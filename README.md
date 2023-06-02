@@ -28,9 +28,9 @@ By using the Legend Avatar Trade Smart Contract, Users agree to be bound by the 
 
 ## 4. Governing Law
 
-4.1. This Agreement shall be governed by and interpreted in accordance with the laws of [Jurisdiction].
+4.1. This Agreement shall be governed by and interpreted in accordance with international laws and regulations applicable to non-fungible tokens (NFTs) and blockchain technology.
 
-4.2. Any disputes arising out of or in connection with this Agreement shall be resolved through amicable negotiations between the parties.
+4.2. Any disputes arising out of or in connection with this Agreement shall be resolved through amicable negotiations between the parties or, if necessary, through alternative dispute resolution methods such as arbitration or mediation.
 
 ## 5. Miscellaneous
 
