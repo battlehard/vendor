@@ -1,7 +1,6 @@
 .DS_STORE
 .idea
 wallets/*
-Test*
 bin/
 Debug/
 obj/

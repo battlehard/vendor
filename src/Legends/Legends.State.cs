@@ -5,7 +5,7 @@ namespace Swappables
 {
   /// <summary>
   /// Class <c>LegendsState</c>
-  /// Inherit TokenId, Owner, Name from Nep11TokenState
+  /// Inherit Owner, Name from Nep11TokenState
   /// Add ImageUrl
   /// </summary>
   public class LegendsState : Nep11TokenState

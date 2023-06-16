@@ -4,9 +4,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "options": {
-        "cwd": "${workspaceFolder}/src/Legends"
-      },
       "label": "restore-tools",
       "command": "dotnet",
       "type": "shell",
@@ -14,9 +11,6 @@
       "problemMatcher": []
     },
     {
-      "options": {
-        "cwd": "${workspaceFolder}/src/Legends"
-      },
       "label": "build",
       "dependsOn": "restore-tools",
       "command": "dotnet",
