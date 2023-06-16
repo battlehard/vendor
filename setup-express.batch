@@ -1,2 +1,10 @@
 transfer 10000 gas genesis owner
 transfer 10000 neo genesis owner
+transfer 10000 gas genesis admin
+transfer 10000 neo genesis admin
+transfer 10000 gas genesis user
+transfer 10000 neo genesis user
+
+contract deploy ./src/Legends/bin/sc/Legends.nef owner
+contract invoke ./invoke-files/add-admin-whitelist.neo-invoke.json owner
+checkpoint create ./checkpoints/legends-deployed -f

@@ -71,6 +71,23 @@
           }
         }
       ]
+    },
+    {
+      "name": "user",
+      "accounts": [
+        {
+          "private-key": "deb6f70c79c6259e47d54913c9518c3822271cba0917fc1a4c1d912c7a7c4e4a",
+          "script-hash": "NQbHe4RTkzwGD3tVYsTcHEhxWpN4ZEuMuG",
+          "label": null,
+          "is-default": true,
+          "contract": {
+            "script": "0c21030d62465fe4f3fa450c08650afadd3c67a58820b2e2fd47d04a8e36e79647e29a4156e7b327",
+            "parameters": [
+              "Signature"
+            ]
+          }
+        }
+      ]
     }
   ],
   "settings": {}
