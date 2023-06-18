@@ -31,6 +31,26 @@
       "storage": [],
       "signers": ["@owner"],
       "checkpoint": "${workspaceFolder}/checkpoints/legends-deployed.neoxp-checkpoint"
+    },
+    {
+      "name": "Transfer success",
+      "type": "neo-contract",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Legends/bin/sc/Legends.nef",
+      "neo-express": "${workspaceFolder}/default.neo-express",
+      "invocation": {
+        "operation": "trade",
+        "args": ["LegendsOwner", "LegendsOne"]
+      },
+      "storage": [],
+      "signers": [
+        {
+          "account": "@owner",
+          "scopes": "CalledByEntry, CustomContracts",
+          "allowedcontracts": ["0x7c18cc8741c19ebdb835ed0b3ef3d1c6adec5262"] // Legends contract hash
+        }
+      ],
+      "checkpoint": "${workspaceFolder}/checkpoints/legends-minted-to-wallet.neoxp-checkpoint"
     }
   ]
 }

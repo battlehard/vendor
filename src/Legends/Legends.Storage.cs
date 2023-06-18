@@ -54,6 +54,13 @@ namespace Swappables
         StorageMap tradePoolMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
         tradePoolMap.Delete(tokenId);
       }
+
+      public static bool IsAvailable(string tokenId)
+      {
+        StorageMap tradePoolMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
+        if (tradePoolMap[tokenId] is not null) return true;
+        else return false;
+      }
     }
   }
 }

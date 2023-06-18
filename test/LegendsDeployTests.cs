@@ -50,11 +50,11 @@ namespace test
 
       using SnapshotCache snapshot = fixture.GetSnapshot();
       using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, owner);
-      engine.ExecuteScript<Legends>(c => c.properties(Neo.Utility.StrictUTF8.GetBytes(Common.LEGENDS_NAME)));
+      engine.ExecuteScript<Legends>(c => c.properties(Neo.Utility.StrictUTF8.GetBytes(Common.LEGENDS_ONE)));
       engine.State.Should().Be(VMState.HALT);
       engine.ResultStack.Should().HaveCount(1);
       StackItem legendsState = engine.ResultStack.Pop();
-      Common.GetStringValueFromMapKey(legendsState, "name").Should().Be(Common.LEGENDS_NAME);
+      Common.GetStringValueFromMapKey(legendsState, "name").Should().Be(Common.LEGENDS_ONE);
     }
 
 

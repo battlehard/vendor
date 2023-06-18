@@ -61,7 +61,7 @@ namespace Swappables
     public static void Burn(string tokenId)
     {
       CheckAdminAuthorization();
-      ValidateBurnTokenId(tokenId);
+      ValidateExistingTokenId(tokenId);
       Neo.SmartContract.Framework.Nep11Token<LegendsState>.Burn(tokenId);
       // Remove token from trade pool
       TradePoolStorage.Delete(tokenId);

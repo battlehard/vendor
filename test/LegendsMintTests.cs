@@ -36,11 +36,12 @@ namespace test
 
       using SnapshotCache snapshot = fixture.GetSnapshot();
       using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, owner);
-      engine.ExecuteScript<Legends>(c => c.mint("https://host.com/owner.jpg", "LegendsOwner", null));
+      engine.ExecuteScript<Legends>(c => c.mint("https://host.com/owner.jpg", Common.LEGENDS_OWNER, null));
       engine.State.Should().Be(VMState.HALT);
       engine.ResultStack.Should().HaveCount(1);
       IReadOnlyDictionary<ReadOnlyMemory<byte>, StorageItem> storages = snapshot.GetContractStorages<Legends>();
-      storages.TryGetValue(Neo.Helper.Concat(Common.Prefix_Trade_Pool, Neo.Utility.StrictUTF8.GetBytes("LegendsOwner")), out StorageItem item).Should().BeTrue();
+      storages.TryGetValue(Neo.Helper.Concat(Common.Prefix_Trade_Pool, Neo.Utility.StrictUTF8.GetBytes(Common.LEGENDS_OWNER)), out StorageItem item).Should().BeTrue();
+      engine.Notifications.Should().HaveCount(2); // 1 transfer and 1 mint event
     }
 
     [Fact]
@@ -51,11 +52,12 @@ namespace test
 
       using SnapshotCache snapshot = fixture.GetSnapshot();
       using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, admin);
-      engine.ExecuteScript<Legends>(c => c.mint("https://host.com/admin.jpg", "LegendsAdmin", admin));
+      engine.ExecuteScript<Legends>(c => c.mint("https://host.com/admin.jpg", Common.LEGENDS_ADMIN, admin));
       engine.State.Should().Be(VMState.HALT);
       engine.ResultStack.Should().HaveCount(1);
       IReadOnlyDictionary<ReadOnlyMemory<byte>, StorageItem> storages = snapshot.GetContractStorages<Legends>();
-      storages.TryGetValue(Neo.Helper.Concat(Common.Prefix_Trade_Pool, Neo.Utility.StrictUTF8.GetBytes("LegendsAdmin")), out StorageItem item).Should().BeFalse();
+      storages.TryGetValue(Neo.Helper.Concat(Common.Prefix_Trade_Pool, Neo.Utility.StrictUTF8.GetBytes(Common.LEGENDS_ADMIN)), out StorageItem item).Should().BeFalse();
+      engine.Notifications.Should().HaveCount(2);
     }
 
     [Fact]
@@ -66,7 +68,7 @@ namespace test
 
       using SnapshotCache snapshot = fixture.GetSnapshot();
       using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, user);
-      engine.ExecuteScript<Legends>(c => c.mint("https://host.com/user.jpg", "LegendsUser", user));
+      engine.ExecuteScript<Legends>(c => c.mint("https://host.com/user.jpg", Common.LEGENDS_USER, user));
       engine.State.Should().Be(VMState.FAULT);
       engine.UncaughtException.GetString().Should().Contain("No admin authorization");
     }
@@ -79,7 +81,7 @@ namespace test
 
       using SnapshotCache snapshot = fixture.GetSnapshot();
       using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, owner);
-      engine.ExecuteScript<Legends>(c => c.mint("https://host.com/LegendsOne.jpg", Common.LEGENDS_NAME, owner));
+      engine.ExecuteScript<Legends>(c => c.mint("https://host.com/LegendsOne.jpg", Common.LEGENDS_ONE, owner));
       engine.State.Should().Be(VMState.FAULT);
       engine.UncaughtException.GetString().Should().Contain("This token already minted");
     }

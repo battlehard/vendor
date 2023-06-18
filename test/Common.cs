@@ -10,7 +10,11 @@ namespace test
   {
     public static readonly byte[] Prefix_Owner = new byte[] { 0x01, 0x00 };
     public static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x02 };
-    public static readonly string LEGENDS_NAME = "LegendsOne";
+    public static readonly string LEGENDS_ONE = "LegendsOne";
+    public static readonly string LEGENDS_OWNER = "LegendsOwner";
+    public static readonly string LEGENDS_ADMIN = "LegendsAdmin";
+    public static readonly string LEGENDS_USER = "LegendsUser";
+    public static readonly string LEGENDS_NOT_EXIST = "LegendsNotExist";
 
     /// <summary>
     /// Use for extract StackItem that store Map<string, object> data type. e.g. return value from Properties

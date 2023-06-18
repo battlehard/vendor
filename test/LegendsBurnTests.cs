@@ -36,11 +36,12 @@ namespace test
 
       using SnapshotCache snapshot = fixture.GetSnapshot();
       using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, owner);
-      engine.ExecuteScript<Legends>(c => c.burn(Common.LEGENDS_NAME));
+      engine.ExecuteScript<Legends>(c => c.burn(Common.LEGENDS_ONE));
       engine.State.Should().Be(VMState.HALT);
       engine.ResultStack.Should().HaveCount(1);
       IReadOnlyDictionary<ReadOnlyMemory<byte>, StorageItem> storages = snapshot.GetContractStorages<Legends>();
-      storages.TryGetValue(Neo.Helper.Concat(Common.Prefix_Trade_Pool, Neo.Utility.StrictUTF8.GetBytes(Common.LEGENDS_NAME)), out StorageItem item).Should().BeFalse();
+      storages.TryGetValue(Neo.Helper.Concat(Common.Prefix_Trade_Pool, Neo.Utility.StrictUTF8.GetBytes(Common.LEGENDS_ONE)), out StorageItem item).Should().BeFalse();
+      engine.Notifications.Should().HaveCount(2); // 1 transfer and 1 burn event
     }
 
     [Fact]
@@ -51,11 +52,12 @@ namespace test
 
       using SnapshotCache snapshot = fixture.GetSnapshot();
       using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, admin);
-      engine.ExecuteScript<Legends>(c => c.burn(Common.LEGENDS_NAME));
+      engine.ExecuteScript<Legends>(c => c.burn(Common.LEGENDS_ONE));
       engine.State.Should().Be(VMState.HALT);
       engine.ResultStack.Should().HaveCount(1);
       IReadOnlyDictionary<ReadOnlyMemory<byte>, StorageItem> storages = snapshot.GetContractStorages<Legends>();
-      storages.TryGetValue(Neo.Helper.Concat(Common.Prefix_Trade_Pool, Neo.Utility.StrictUTF8.GetBytes(Common.LEGENDS_NAME)), out StorageItem item).Should().BeFalse();
+      storages.TryGetValue(Neo.Helper.Concat(Common.Prefix_Trade_Pool, Neo.Utility.StrictUTF8.GetBytes(Common.LEGENDS_ONE)), out StorageItem item).Should().BeFalse();
+      engine.Notifications.Should().HaveCount(2);
     }
 
     [Fact]
@@ -66,7 +68,7 @@ namespace test
 
       using SnapshotCache snapshot = fixture.GetSnapshot();
       using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, user);
-      engine.ExecuteScript<Legends>(c => c.burn(Common.LEGENDS_NAME));
+      engine.ExecuteScript<Legends>(c => c.burn(Common.LEGENDS_ONE));
       engine.State.Should().Be(VMState.FAULT);
       engine.UncaughtException.GetString().Should().Contain("No admin authorization");
     }
@@ -79,7 +81,7 @@ namespace test
 
       using SnapshotCache snapshot = fixture.GetSnapshot();
       using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, owner);
-      engine.ExecuteScript<Legends>(c => c.burn("DeletedLegends"));
+      engine.ExecuteScript<Legends>(c => c.burn(Common.LEGENDS_NOT_EXIST));
       engine.State.Should().Be(VMState.FAULT);
       engine.UncaughtException.GetString().Should().Contain("This token not existing");
     }
