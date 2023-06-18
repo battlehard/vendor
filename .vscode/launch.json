@@ -33,7 +33,7 @@
       "checkpoint": "${workspaceFolder}/checkpoints/legends-deployed.neoxp-checkpoint"
     },
     {
-      "name": "Transfer success",
+      "name": "Trade success",
       "type": "neo-contract",
       "request": "launch",
       "program": "${workspaceFolder}/src/Legends/bin/sc/Legends.nef",
@@ -47,7 +47,8 @@
         {
           "account": "@owner",
           "scopes": "CalledByEntry, CustomContracts",
-          "allowedcontracts": ["0x7c18cc8741c19ebdb835ed0b3ef3d1c6adec5262"] // Legends contract hash
+          // Legends contract hash. Need to update to actual value based on checkpoint which re-generated frequently.
+          "allowedcontracts": ["0xd0ecc2cacdf774ac1b1c8f28797bf732ebba9b79"]
         }
       ],
       "checkpoint": "${workspaceFolder}/checkpoints/legends-minted-to-wallet.neoxp-checkpoint"
