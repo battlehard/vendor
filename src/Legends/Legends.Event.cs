@@ -13,5 +13,9 @@ namespace Swappables
     [DisplayName("LegendsBurn")]
     public static event OnBurnDelegate OnBurn;
     public delegate void OnBurnDelegate(string tokenId);
+
+    [DisplayName("LegendsTrade")]
+    public static event OnTradeDelegate OnTrade;
+    public delegate void OnTradeDelegate(string fromTokenId, string toTokenId, UInt160 walletAddress);
   }
 }
