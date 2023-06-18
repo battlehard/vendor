@@ -1,13 +1,13 @@
 using FluentAssertions;
-using NeoTestHarness;
 using Neo;
+using Neo.Assertions;
 using Neo.BlockchainToolkit;
 using Neo.BlockchainToolkit.Models;
 using Neo.BlockchainToolkit.SmartContract;
 using Neo.Persistence;
 using Neo.SmartContract;
-using Neo.Assertions;
 using Neo.VM;
+using NeoTestHarness;
 using TestSwappables; // For reference contract method interface e.g. Legends
 using Xunit;
 
@@ -63,6 +63,33 @@ namespace test
       engine.ExecuteScript<Legends>(c => c.mint("https://host.com/user.jpg", "LegendsUser", user));
       engine.State.Should().Be(VMState.FAULT);
       engine.UncaughtException.GetString().Should().Contain("No admin authorization");
+    }
+
+    [Fact]
+    public void mint_same_name_error() // This name has been once mint using express batch.
+    {
+      ProtocolSettings settings = chain.GetProtocolSettings();
+      UInt160 owner = chain.GetDefaultAccount("owner").ToScriptHash(settings.AddressVersion);
+
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, owner);
+      engine.ExecuteScript<Legends>(c => c.mint("https://host.com/LegendsOne.jpg", Common.LEGENDS_NAME, owner));
+      engine.State.Should().Be(VMState.FAULT);
+      engine.UncaughtException.GetString().Should().Contain("This token already minted");
+    }
+
+    [Fact]
+    public void mint_long_name_error()
+    {
+      ProtocolSettings settings = chain.GetProtocolSettings();
+      UInt160 owner = chain.GetDefaultAccount("owner").ToScriptHash(settings.AddressVersion);
+
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      using TestApplicationEngine engine = new TestApplicationEngine(snapshot, settings, owner);
+      string nameWithLength33 = "012345678901234567890123456789012345678901234567890123456789_33";
+      engine.ExecuteScript<Legends>(c => c.mint("https://host.com/LegendsOne.jpg", nameWithLength33, owner));
+      engine.State.Should().Be(VMState.FAULT);
+      engine.UncaughtException.GetString().Should().Contain("Name must not longer than 32 characters");
     }
   }
 }

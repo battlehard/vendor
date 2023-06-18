@@ -21,31 +21,37 @@ namespace Swappables
       }
     }
 
-    // TODO: Test that pass two parameters work. Using Debugger.
-    public static void Mint(string imageUrl, string name, UInt160? minter = null)
+    /// <summary>
+    /// Mint Legends NFT with specified params.
+    /// </summary>
+    /// <param name="imageUrl">Path to NFT image.</param>
+    /// <param name="name">Name of NFT, this will also use as tokenId.</param>
+    /// <param name="walletAddress">Mint destination address. In case of store in contract, this param must be `null`</param>
+    public static void Mint(string imageUrl, string name, UInt160? walletAddress)
     {
       CheckAdminAuthorization();
-      if (minter is not null)
+      if (walletAddress is not null)
       {
-        ValidateAddress(minter);
+        ValidateAddress(walletAddress);
       }
       else
       {
-        // TODO: Make sure that when null, use contract address. Test using Debugger
         Transaction Tx = (Transaction)Runtime.ScriptContainer;
-        minter = Runtime.ExecutingScriptHash;
+        walletAddress = Runtime.ExecutingScriptHash;
       }
+      ValidateName(name);
+      ValidateTokenId(name);
 
       LegendsState mintNftState = new LegendsState
       {
-        Owner = minter,
+        Owner = walletAddress,
         Name = name,
         ImageUrl = imageUrl,
       };
 
       // Legends use name as tokenId
       Mint(name, mintNftState);
-      OnMint(name, imageUrl, name, minter);
+      OnMint(name, imageUrl, name, walletAddress);
       // TODO: Add minted token to trade pool
     }
 

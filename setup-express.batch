@@ -7,4 +7,5 @@ transfer 10000 neo genesis user
 
 contract deploy ./src/Legends/bin/sc/Legends.nef owner
 contract invoke ./invoke-files/add-admin-whitelist.neo-invoke.json owner
+contract invoke ./invoke-files/mint.neo-invoke.json owner
 checkpoint create ./checkpoints/legends-deployed -f

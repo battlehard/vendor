@@ -1,0 +1,22 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Mint with two arguments",
+      "type": "neo-contract",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Legends/bin/sc/Legends.nef",
+      "neo-express": "${workspaceFolder}/default.neo-express",
+      "invocation": {
+        "operation": "mint",
+        "args": ["https://host.com/image.jpg", "LegendsName", null]
+      },
+      "storage": [],
+      "signers": ["@owner"],
+      "checkpoint": "${workspaceFolder}/checkpoints/legends-deployed.neoxp-checkpoint"
+    }
+  ]
+}
