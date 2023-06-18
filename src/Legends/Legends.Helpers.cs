@@ -11,10 +11,16 @@ namespace Swappables
       Assert(name.Length <= 32, $"{CONTRACT_NAME}: Name must not longer than 32 characters");
     }
 
-    private static void ValidateTokenId(string tokenId)
+    private static void ValidateMintTokenId(string tokenId)
     {
       StorageMap tokenMap = new(Storage.CurrentContext, Prefix_Token);
       Assert(tokenMap.Get(tokenId) == null, $"{CONTRACT_NAME}: This token already minted");
+    }
+
+    private static void ValidateBurnTokenId(string tokenId)
+    {
+      StorageMap tokenMap = new(Storage.CurrentContext, Prefix_Token);
+      Assert(tokenMap.Get(tokenId) != null, $"{CONTRACT_NAME}: This token not existing");
     }
   }
 }

@@ -17,6 +17,20 @@
       "storage": [],
       "signers": ["@owner"],
       "checkpoint": "${workspaceFolder}/checkpoints/legends-deployed.neoxp-checkpoint"
+    },
+    {
+      "name": "Burn success",
+      "type": "neo-contract",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Legends/bin/sc/Legends.nef",
+      "neo-express": "${workspaceFolder}/default.neo-express",
+      "invocation": {
+        "operation": "burn",
+        "args": ["LegendsOne"]
+      },
+      "storage": [],
+      "signers": ["@owner"],
+      "checkpoint": "${workspaceFolder}/checkpoints/legends-deployed.neoxp-checkpoint"
     }
   ]
 }

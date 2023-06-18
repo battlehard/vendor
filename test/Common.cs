@@ -9,6 +9,7 @@ namespace test
   static class Common
   {
     public static readonly byte[] Prefix_Owner = new byte[] { 0x01, 0x00 };
+    public static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x02 };
     public static readonly string LEGENDS_NAME = "LegendsOne";
 
     /// <summary>
