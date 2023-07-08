@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import {
   IConnectedWallet,
   IWalletOptions,
@@ -9,7 +9,6 @@ import {
 } from '@/utils/neo/interfaces'
 import { sc } from '@cityofzion/neon-core'
 import { WalletAPI } from '@/utils/neo/wallet'
-import { NEO_LINE } from '@/utils/neo/constant'
 
 export const WalletContext = createContext({} as IWalletStates)
 
@@ -79,47 +78,16 @@ export default function WalletProvider(props: {
     isOneGateAvailable,
   }
 
-  useEffect(() => {
-    if (connectedWallet) {
-      const refresh = () => {
-        connectWallet(connectedWallet.key)
-      }
-      const disconnected = () => {
-        disConnectWallet()
-      }
-
-      if (connectedWallet.key === NEO_LINE) {
-        window.addEventListener('NEOLine.NEO.EVENT.ACCOUNT_CHANGED', refresh)
-        window.addEventListener('NEOLine.NEO.EVENT.NETWORK_CHANGED', refresh)
-        window.addEventListener('NEOLine.NEO.EVENT.DISCONNECTED', disconnected)
-        return () => {
-          window.removeEventListener(
-            'NEOLine.NEO.EVENT.ACCOUNT_CHANGED',
-            refresh
-          )
-          window.removeEventListener(
-            'NEOLine.NEO.EVENT.NETWORK_CHANGED',
-            refresh
-          )
-          window.removeEventListener(
-            'NEOLine.NEO.EVENT.DISCONNECTED',
-            disconnected
-          )
-        }
-      }
-    }
-  }, [])
-
   // Check wallet provider availability
   function checkNeoLineAvailability() {
     try {
       // @ts-ignore
       const neoLineInstance = new NEOLineN3.Init()
       setNeoLineAvailability(true)
-      if (process.env.IS_DEBUG) console.log('NeoLine AVAILABLE')
+      if (process.env.NEXT_PUBLIC_IS_DEBUG) console.log('NeoLine AVAILABLE')
     } catch (e) {
       setNeoLineAvailability(false)
-      if (process.env.IS_DEBUG) console.log('NeoLine UN-AVAILABLE')
+      if (process.env.NEXT_PUBLIC_IS_DEBUG) console.log('NeoLine UN-AVAILABLE')
     }
   }
 
@@ -127,11 +95,11 @@ export default function WalletProvider(props: {
     // @ts-ignore
     if (window.OneGate && !window.NeoLineMobile) {
       setOneGateAvailability(true)
-      if (process.env.IS_DEBUG)
+      if (process.env.NEXT_PUBLIC_IS_DEBUG)
         console.log('OneGate AVAILABLE, Neon UN-AVAILABLE')
     } else {
       setOneGateAvailability(false)
-      if (process.env.IS_DEBUG) console.log('OneGate UN-AVAILABLE')
+      if (process.env.NEXT_PUBLIC_IS_DEBUG) console.log('OneGate UN-AVAILABLE')
     }
   }
 
