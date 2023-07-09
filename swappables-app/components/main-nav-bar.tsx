@@ -46,13 +46,14 @@ const MainNavBar = () => {
       >
         {connectedWallet && (
           <Button
-            style={{ borderRadius: '15px' }}
+            style={{ borderRadius: '15px', textTransform: 'none' }}
             variant="contained"
             onClick={disConnectWallet}
             endIcon={<DeleteIcon />}
             color="secondary"
           >
-            {(connectedWallet?.account.address as string).substring(0, 5)}...
+            {(connectedWallet?.account.address as string).substring(0, 6)}...
+            {(connectedWallet?.account.address as string).slice(-6)}
           </Button>
         )}
         {!connectedWallet && (

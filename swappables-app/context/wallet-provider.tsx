@@ -44,7 +44,6 @@ export default function WalletProvider(props: {
       const connectedWallet = await new WalletAPI(walletType).init()
       setConnectedWallet(connectedWallet)
       setWalletModalActive(false)
-      console.log(`Wallet connected successfully`)
     } catch (e) {
       setWalletModalActive(false)
       console.error(e)

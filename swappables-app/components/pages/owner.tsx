@@ -1,14 +1,15 @@
 'use client'
 
 import { AlertColor, Button, TextField } from '@mui/material'
-import TabPanel, { ITabPage } from './tab-panel'
+import TabPanel, { ITabPage } from '../tab-panel'
 import { useWallet } from '@/context/wallet-provider'
 import {
   AdminWhiteListAction,
   LegendsContract,
 } from '@/utils/neo/contracts/legends'
 import React, { ChangeEvent, useState } from 'react'
-import Notification from './notification'
+import Notification from '../notification'
+import { HASH160_PATTERN } from '../constant'
 
 export default function OwnerPage() {
   // Notification
@@ -28,11 +29,11 @@ export default function OwnerPage() {
 
   const pages: ITabPage[] = [
     {
-      label: 'Add Admin White List',
+      label: 'Add admin white list',
       component: AdminWhiteList(AdminWhiteListAction.ADD),
     },
     {
-      label: 'Remove Admin White List',
+      label: 'Remove admin white list',
       component: AdminWhiteList(AdminWhiteListAction.REMOVE),
     },
   ]
@@ -40,9 +41,19 @@ export default function OwnerPage() {
   function AdminWhiteList(adminWhiteListAction: AdminWhiteListAction) {
     const { connectedWallet, network } = useWallet()
     const [inputWalletHash, setInputWalletHash] = useState('')
+    const [isValidHash, setIsValidHash] = useState(true)
+    const isDisable = () => {
+      return !connectedWallet || !isValidHash || inputWalletHash.length == 0
+    }
 
-    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-      setInputWalletHash(event.target.value)
+    const handleWalletHashChange = (event: ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value
+      setInputWalletHash(value)
+      if (value.length > 0) {
+        setIsValidHash(HASH160_PATTERN.test(value))
+      } else {
+        setIsValidHash(true)
+      }
     }
 
     const showPopup = (severity: AlertColor, message: string) => {
@@ -70,7 +81,7 @@ export default function OwnerPage() {
     }
 
     return (
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         <TextField
           required
           style={{
@@ -79,12 +90,22 @@ export default function OwnerPage() {
             marginLeft: '25px',
           }}
           label="Wallet Hash (Required)"
-          helperText="Admin Wallet Addess in Hash160 format"
+          helperText={
+            isValidHash
+              ? 'Admin wallet in Hash160 format start in 0x'
+              : 'Invalid hash'
+          }
           defaultValue=""
           value={inputWalletHash}
-          onChange={handleInputChange}
+          onChange={handleWalletHashChange}
+          error={!isValidHash}
+          inputProps={{ maxLength: 42 }}
         />
-        <Button disabled={!connectedWallet} onClick={invoke}>
+        <Button
+          disabled={isDisable()}
+          onClick={invoke}
+          style={{ marginTop: '25px', marginLeft: '25px', alignSelf: 'start' }}
+        >
           Invoke
         </Button>
         <Notification
