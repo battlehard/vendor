@@ -40,7 +40,7 @@ namespace Swappables
       AdminWhiteListStorage.Put(contractHash);
     }
 
-    public static void RemoveAdminWhitelist(UInt160 contractHash)
+    public static void RemoveAdminWhiteList(UInt160 contractHash)
     {
       CheckOwner();
       AdminWhiteListStorage.Delete(contractHash);

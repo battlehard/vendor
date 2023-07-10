@@ -1,12 +1,6 @@
 import { Argument, BaseDapi, Dapi } from '@neongd/neo-dapi'
 import { Provider } from '@neongd/neo-provider'
-import {
-  IBalance,
-  IInvokeScriptJson,
-  INetworkType,
-  ITransaction,
-  IWalletType,
-} from './interfaces'
+import { IBalance, IInvokeScriptJson, IWalletType } from './interfaces'
 import {
   GAS_SCRIPT_HASH,
   NEO_LINE,
@@ -15,7 +9,6 @@ import {
   WALLET_LIST,
 } from './constant'
 import { wallet as NeonWallet, u } from '@cityofzion/neon-core'
-import moment from 'moment'
 import { Signer, WitnessScope } from '@cityofzion/neon-core/lib/tx'
 
 export class WalletAPI {
@@ -52,6 +45,11 @@ export class WalletAPI {
     const network = await instance2.getNetworks()
     const provider = await instance.getProvider()
     const account = await instance.getAccount()
+    if (process.env.NEXT_PUBLIC_IS_DEBUG) {
+      console.log(`Provider: ${JSON.stringify(provider)}`)
+      console.log(`Account: ${JSON.stringify(account)}`)
+      console.log(`Network: ${JSON.stringify(network)}`)
+    }
     return { provider, account, network, balances: {} }
   }
 
@@ -63,7 +61,7 @@ export class WalletAPI {
     // @ts-ignore
     else if (window.OneGate) provider = window.OneGate as Provider
 
-    if (process.env.IS_DEBUG)
+    if (process.env.NEXT_PUBLIC_IS_DEBUG)
       console.log(`Window Provider Type: ${JSON.stringify(provider)}`)
 
     if (provider) {
@@ -109,7 +107,7 @@ export class WalletAPI {
       })
     })
 
-    if (process.env.IS_DEBUG) {
+    if (process.env.NEXT_PUBLIC_IS_DEBUG) {
       console.log(`Provider: ${JSON.stringify(provider)}`)
       console.log(`Account: ${JSON.stringify(account)}`)
       console.log(`Network: ${JSON.stringify(network)}`)
@@ -139,75 +137,33 @@ export class WalletAPI {
     }
   }
 
-  /* Control signing and send transaction. TODO:Need to improve type hardcoding later */
+  /* Control signing and send transaction. */
   invoke = async (
-    network: INetworkType,
     senderAddress: string,
-    invokeScript: IInvokeScriptJson | IInvokeScriptJson[]
+    invokeScript: IInvokeScriptJson
   ): Promise<string> => {
-    const isMulti = Array.isArray(invokeScript)
     const wallet = await this.getInstance(this.walletType)
-    let res
-    let signers: Signer[] = [
+    // Prepare default signer scope in case that invokeScript not contain signer
+    const signers: Signer[] = [
       {
         //@ts-ignore
         account: NeonWallet.getScriptHashFromAddress(senderAddress),
         scopes: WitnessScope.CalledByEntry,
       },
     ]
+    if (!invokeScript.signers) invokeScript.signers = signers
+    // OneGate use different type than NeoLine
     if (this.walletType === ONEGATE) {
-      if (!isMulti) {
-        if (!invokeScript.signers) invokeScript.signers = signers
-        // @ts-ignore
-        invokeScript.args = this.buildOneGateArgs(invokeScript.args)
-        invokeScript.signers = this.buildStringScopes(invokeScript.signers)
-        if (process.env.IS_DEBUG) console.log(JSON.stringify(invokeScript))
-        res = await wallet.invoke(invokeScript)
-      } else {
-        const invocations = invokeScript.map((script) => {
-          if (script.signers) signers = script.signers
-          // @ts-ignore
-          const args = this.buildOneGateArgs(script.args)
-          return {
-            scriptHash: script.scriptHash,
-            operation: script.operation,
-            args,
-          }
-        })
-        signers = this.buildStringScopes(signers)
-        if (process.env.IS_DEBUG)
-          console.log(JSON.stringify({ invocations, signers }))
-        res = await wallet.invokeMulti({ invocations, signers })
-      }
-    } else {
-      if (!isMulti) {
-        if (!invokeScript.signers) invokeScript.signers = signers
-        if (process.env.IS_DEBUG) console.log(JSON.stringify(invokeScript))
-        res = await wallet.invoke(invokeScript)
-      } else {
-        const invokeArgs = invokeScript.map((script) => {
-          if (script.signers) signers = script.signers
-          return {
-            scriptHash: script.scriptHash,
-            operation: script.operation,
-            args: script.args,
-          }
-        })
-        console.log(JSON.stringify({ invokeArgs, signers }))
-        res = await wallet.invokeMultiple({ invokeArgs, signers })
-      }
+      // @ts-ignore
+      invokeScript.args = this.buildOneGateArgs(invokeScript.args)
+      invokeScript.signers = this.buildStringScopes(invokeScript.signers)
     }
-    // explicitly declare txid to support NEON
-    const txid = res.txid
-    if (process.env.IS_DEBUG) console.log(`txid: ${txid}`)
-    if (!isMulti) {
-      this.buildSubmittedTx(network, txid, invokeScript)
-    } else {
-      invokeScript.forEach((script) => {
-        this.buildSubmittedTx(network, txid, script)
-      })
-    }
-    return txid
+    if (process.env.NEXT_PUBLIC_IS_DEBUG)
+      console.log(JSON.stringify(invokeScript))
+    // Invoke smartcontract methods
+    const res = await wallet.invoke(invokeScript)
+    if (process.env.NEXT_PUBLIC_IS_DEBUG) console.log(`txid: ${res.txid}`)
+    return res.txid
   }
 
   private buildOneGateArgs = (args: Argument[]): Argument[] => {
@@ -247,22 +203,5 @@ export class WalletAPI {
       }
       return signer
     })
-  }
-
-  private buildSubmittedTx = (
-    network: INetworkType,
-    txid: string,
-    script: IInvokeScriptJson
-  ): ITransaction => {
-    return {
-      network,
-      wallet: this.walletType,
-      status: 'PENDING',
-      txid,
-      contractHash: script.scriptHash,
-      method: script.operation,
-      args: script.args,
-      createdAt: moment().format('MMMM Do YYYY, h:mm:ss a'),
-    }
   }
 }

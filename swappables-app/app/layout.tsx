@@ -2,6 +2,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import WalletProvider from '../context/wallet-provider'
 import { INetworkType } from '@/utils/neo/interfaces'
+import MainNavBar from '@/components/main-nav-bar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,9 +21,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <WalletProvider
           options={{
-            network: process.env.NETWORK as INetworkType,
+            network: process.env.NEXT_PUBLIC_NETWORK as INetworkType,
           }}
         >
+          <MainNavBar />
           {children}
         </WalletProvider>
       </body>
