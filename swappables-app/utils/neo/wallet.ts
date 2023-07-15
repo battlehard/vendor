@@ -144,14 +144,8 @@ export class WalletAPI {
   ): Promise<string> => {
     const wallet = await this.getInstance(this.walletType)
     // Prepare default signer scope in case that invokeScript not contain signer
-    const signers: Signer[] = [
-      {
-        //@ts-ignore
-        account: NeonWallet.getScriptHashFromAddress(senderAddress),
-        scopes: WitnessScope.CalledByEntry,
-      },
-    ]
-    if (!invokeScript.signers) invokeScript.signers = signers
+    if (!invokeScript.signers)
+      invokeScript.signers = this.getDefaultSigner(senderAddress)
     // OneGate use different type than NeoLine
     if (this.walletType === ONEGATE) {
       // @ts-ignore
@@ -162,6 +156,47 @@ export class WalletAPI {
       console.log(JSON.stringify(invokeScript))
     // Invoke smartcontract methods
     const res = await wallet.invoke(invokeScript)
+    if (process.env.NEXT_PUBLIC_IS_DEBUG) console.log(`txid: ${res.txid}`)
+    return res.txid
+  }
+
+  invokeMulti = async (
+    senderAddress: string,
+    invokeScripts: IInvokeScriptJson[]
+  ): Promise<string> => {
+    let res
+    let signers = this.getDefaultSigner(senderAddress)
+    const wallet = await this.getInstance(this.walletType)
+    // OneGate use different type than NeoLine
+    if (this.walletType === ONEGATE) {
+      const invocations = invokeScripts.map((script) => {
+        if (script.signers) signers = script.signers
+        // @ts-ignore
+        const args = this.buildOneGateArgs(script.args)
+        return {
+          scriptHash: script.scriptHash,
+          operation: script.operation,
+          args,
+        }
+      })
+      signers = this.buildStringScopes(signers)
+      if (process.env.NEXT_PUBLIC_IS_DEBUG)
+        console.log(JSON.stringify({ invocations, signers }))
+      res = await wallet.invokeMulti({ invocations, signers })
+    } else {
+      const invokeArgs = invokeScripts.map((script) => {
+        if (script.signers) signers = script.signers
+        return {
+          scriptHash: script.scriptHash,
+          operation: script.operation,
+          args: script.args,
+        }
+      })
+      if (process.env.NEXT_PUBLIC_IS_DEBUG)
+        console.log(JSON.stringify({ invokeArgs, signers }))
+      res = await wallet.invokeMultiple({ invokeArgs, signers })
+    }
+
     if (process.env.NEXT_PUBLIC_IS_DEBUG) console.log(`txid: ${res.txid}`)
     return res.txid
   }
@@ -203,5 +238,15 @@ export class WalletAPI {
       }
       return signer
     })
+  }
+
+  private getDefaultSigner = (senderAddress: string): Signer[] => {
+    return [
+      {
+        //@ts-ignore
+        account: NeonWallet.getScriptHashFromAddress(senderAddress),
+        scopes: WitnessScope.CalledByEntry,
+      },
+    ]
   }
 }
