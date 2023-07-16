@@ -8,6 +8,7 @@ import {
 import { WalletAPI } from '../wallet'
 import { getTokensOf, stackJsonToObject } from '../helpers'
 import { Network } from '../network'
+import { wallet as NeonWallet, tx } from '@cityofzion/neon-core'
 
 export enum AdminWhiteListAction {
   ADD = 'Add',
@@ -23,6 +24,16 @@ export interface ILegendsProperties {
   owner: string
   name: string
   image: string
+}
+
+export interface IMintInput {
+  imageUrl: string
+  name: string
+  walletHash: string | null
+}
+
+export interface IBurnInput {
+  tokenId: string
 }
 
 export class LegendsContract {
@@ -58,35 +69,9 @@ export class LegendsContract {
 
   Mint = async (
     connectedWallet: IConnectedWallet,
-    imageUrl: string,
-    tokenName: string,
-    walletHash: string | null
+    mintData: IMintInput
   ): Promise<string> => {
-    const invokeScript: IInvokeScriptJson = {
-      operation: 'mint',
-      scriptHash: this.contractHash,
-      args: [
-        {
-          type: 'String',
-          value: imageUrl,
-        },
-        {
-          type: 'String',
-          value: tokenName,
-        },
-      ],
-    }
-    if (walletHash) {
-      invokeScript.args?.push({
-        type: 'Hash160',
-        value: walletHash,
-      })
-    } else {
-      invokeScript.args?.push({
-        type: 'Any',
-        value: null,
-      })
-    }
+    const invokeScript = this.BuildMintScript([mintData])[0]
 
     return new WalletAPI(connectedWallet.key).invoke(
       connectedWallet.account.address,
@@ -94,17 +79,124 @@ export class LegendsContract {
     )
   }
 
+  BulkMint = async (
+    connectedWallet: IConnectedWallet,
+    bulkMintData: IMintInput[]
+  ): Promise<string> => {
+    const invokeScripts = this.BuildMintScript(bulkMintData)
+
+    return new WalletAPI(connectedWallet.key).invokeMulti(
+      connectedWallet.account.address,
+      invokeScripts
+    )
+  }
+
+  private BuildMintScript = (
+    bulkMintData: IMintInput[]
+  ): IInvokeScriptJson[] => {
+    const invokeScripts: IInvokeScriptJson[] = []
+    for (let i = 0; i < bulkMintData.length; i++) {
+      const { imageUrl, name, walletHash } = bulkMintData[i]
+      const invokeScript: IInvokeScriptJson = {
+        operation: 'mint',
+        scriptHash: this.contractHash,
+        args: [
+          {
+            type: 'String',
+            value: imageUrl,
+          },
+          {
+            type: 'String',
+            value: name,
+          },
+        ],
+      }
+      if (walletHash) {
+        invokeScript.args?.push({
+          type: 'Hash160',
+          value: walletHash,
+        })
+      } else {
+        invokeScript.args?.push({
+          type: 'Any',
+          value: null,
+        })
+      }
+      invokeScripts.push(invokeScript)
+    }
+    return invokeScripts
+  }
+
   Burn = async (
     connectedWallet: IConnectedWallet,
-    tokenId: string
+    burnData: IBurnInput
+  ): Promise<string> => {
+    const invokeScript = this.BuildBurnScript([burnData])[0]
+
+    return new WalletAPI(connectedWallet.key).invoke(
+      connectedWallet.account.address,
+      invokeScript
+    )
+  }
+
+  BulkBurn = async (
+    connectedWallet: IConnectedWallet,
+    bulkBurnData: IBurnInput[]
+  ): Promise<string> => {
+    const invokeScripts = this.BuildBurnScript(bulkBurnData)
+
+    return new WalletAPI(connectedWallet.key).invokeMulti(
+      connectedWallet.account.address,
+      invokeScripts
+    )
+  }
+
+  private BuildBurnScript = (
+    bulkBurnData: IBurnInput[]
+  ): IInvokeScriptJson[] => {
+    const invokeScripts: IInvokeScriptJson[] = []
+    for (let i = 0; i < bulkBurnData.length; i++) {
+      const { tokenId } = bulkBurnData[i]
+      const invokeScript: IInvokeScriptJson = {
+        operation: 'burn',
+        scriptHash: this.contractHash,
+        args: [
+          {
+            type: 'String',
+            value: tokenId,
+          },
+        ],
+      }
+      invokeScripts.push(invokeScript)
+    }
+    return invokeScripts
+  }
+
+  Trade = async (
+    connectedWallet: IConnectedWallet,
+    fromTokenId: string,
+    toTokenId: string
   ): Promise<string> => {
     const invokeScript: IInvokeScriptJson = {
-      operation: 'burn',
+      operation: 'trade',
       scriptHash: this.contractHash,
       args: [
         {
           type: 'String',
-          value: tokenId,
+          value: fromTokenId,
+        },
+        {
+          type: 'String',
+          value: toTokenId,
+        },
+      ],
+      signers: [
+        {
+          account: NeonWallet.getScriptHashFromAddress(
+            connectedWallet.account.address
+          ),
+          scopes: tx.WitnessScope.CustomContracts,
+          allowedContracts: [this.contractHash], // This scope allow the contract transfer NFT out from user's wallet
         },
       ],
     }
