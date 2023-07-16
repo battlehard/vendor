@@ -8,6 +8,7 @@ import {
 import { WalletAPI } from '../wallet'
 import { getTokensOf, stackJsonToObject } from '../helpers'
 import { Network } from '../network'
+import { wallet as NeonWallet, tx } from '@cityofzion/neon-core'
 
 export enum AdminWhiteListAction {
   ADD = 'Add',
@@ -169,6 +170,41 @@ export class LegendsContract {
       invokeScripts.push(invokeScript)
     }
     return invokeScripts
+  }
+
+  Trade = async (
+    connectedWallet: IConnectedWallet,
+    fromTokenId: string,
+    toTokenId: string
+  ): Promise<string> => {
+    const invokeScript: IInvokeScriptJson = {
+      operation: 'trade',
+      scriptHash: this.contractHash,
+      args: [
+        {
+          type: 'String',
+          value: fromTokenId,
+        },
+        {
+          type: 'String',
+          value: toTokenId,
+        },
+      ],
+      signers: [
+        {
+          account: NeonWallet.getScriptHashFromAddress(
+            connectedWallet.account.address
+          ),
+          scopes: tx.WitnessScope.CustomContracts,
+          allowedContracts: [this.contractHash], // This scope allow the contract transfer NFT out from user's wallet
+        },
+      ],
+    }
+
+    return new WalletAPI(connectedWallet.key).invoke(
+      connectedWallet.account.address,
+      invokeScript
+    )
   }
 
   getProperties = async (tokenId: string): Promise<ILegendsProperties> => {
