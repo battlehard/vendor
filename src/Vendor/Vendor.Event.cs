@@ -9,6 +9,6 @@ namespace Vendor
   {
     [DisplayName("TradeCreated")]
     public static event OnTradeCreatedDelegate OnTradeCreated;
-    public delegate void OnTradeCreatedDelegate(BigInteger tradeId);
+    public delegate void OnTradeCreatedDelegate(BigInteger tradeId, Trade creatingTrade);
   }
 }
