@@ -4,13 +4,12 @@ using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Native;
 using Neo.SmartContract.Framework.Services;
 
-namespace Swappables
+namespace Vendor
 {
-  partial class Legends
+  partial class Vendor
   {
     private static readonly byte[] Prefix_Owner = new byte[] { 0x01, 0x00 };
     private static readonly byte[] Prefix_Admin_White_List = new byte[] { 0x01, 0x01 };
-    private static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x02 };
 
     /// <summary>
     /// Class <c>AdminWhiteListStorage</c>
@@ -34,32 +33,6 @@ namespace Swappables
       {
         StorageMap adminWhiteListMap = new(Storage.CurrentContext, Prefix_Admin_White_List);
         adminWhiteListMap.Delete(contractHash);
-      }
-    }
-
-    /// <summary>
-    /// Class <c>TradePoolStorage</c>
-    /// Storage of NFT in the pool that available for trade.
-    /// </summary>
-    public static class TradePoolStorage
-    {
-      internal static void Put(string tokenId)
-      {
-        StorageMap tradePoolMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
-        tradePoolMap.Put(tokenId, 1);
-      }
-
-      public static void Delete(string tokenId)
-      {
-        StorageMap tradePoolMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
-        tradePoolMap.Delete(tokenId);
-      }
-
-      public static bool IsAvailable(string tokenId)
-      {
-        StorageMap tradePoolMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
-        if (tradePoolMap[tokenId] is not null) return true;
-        else return false;
       }
     }
   }

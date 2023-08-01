@@ -2,12 +2,12 @@ using Neo;
 using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Native;
 using Neo.SmartContract.Framework.Services;
-using static Swappables.Helpers;
+using static Vendor.Helpers;
 
 #pragma warning disable CS8618 // Suppress warning nullable
-namespace Swappables
+namespace Vendor
 {
-  public partial class Legends
+  public partial class Vendor
   {
     private static bool IsOwner()
     {
