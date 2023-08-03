@@ -30,7 +30,7 @@ namespace test
     }
 
     [Fact]
-    public void contract_owner_in_storage()
+    public void Contract_owner_in_storage()
     {
       ProtocolSettings settings = chain.GetProtocolSettings();
       UInt160 owner = chain.GetDefaultAccount("owner").ToScriptHash(settings.AddressVersion);
