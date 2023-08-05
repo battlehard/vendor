@@ -84,9 +84,16 @@ namespace Vendor
       OnTradeExecuted(tradeId, purchasePackages, activeTrade.purchaseTokenHash, purchaseAmount, activeTrade.offerTokenHash, sellAmount);
     }
 
-    public static void CancelTrade()
+    /// <summary>
+    /// Cancel a trade, only trade owner can do this.
+    /// </summary>
+    /// <param name="tradeId">TradeId of active trade</param>
+    public static void CancelTrade(BigInteger tradeId)
     {
-
+      Trade activeTrade = TradePoolStorage.Get(tradeId);
+      // Check ownership
+      Assert(Runtime.CheckWitness(activeTrade.owner), "No permission to cancel trade");
+      InternalCancelTrade(tradeId);
     }
 
     public static void OnNEP11Payment(UInt160 from, BigInteger amount, ByteString tokenId, object[] data)

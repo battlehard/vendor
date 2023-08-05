@@ -130,6 +130,53 @@ namespace test
       storedSoldPackages.ToString().Should().Be(ContractParameterParser.ConvertObject(expectedTrade.soldPackages).ToString());
     }
 
+    [Fact]
+    public void Cancel_trade_with_no_permission()
+    {
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      // Set WitnessScope as Global here to only test login, not permission.
+      using TestApplicationEngine engineStep1 = new(snapshot, settings, user, WitnessScope.Global);
+      CreateTrade(engineStep1, user);
+      engineStep1.State.Should().Be(VMState.HALT);
+      engineStep1.ResultStack.Should().HaveCount(1);
+
+      using TestApplicationEngine engineStep2 = new(snapshot, settings, owner, WitnessScope.Global);
+      engineStep2.ExecuteScript<Vendor>(c => c.cancelTrade(Common.TEST_TRADE_ID));
+      engineStep2.State.Should().Be(VMState.FAULT);
+      engineStep2.UncaughtException.GetString().Should().Contain($"No permission to cancel trade");
+    }
+
+    [Fact]
+    public void Cancel_user_trade_with_admin()
+    {
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      // Set WitnessScope as Global here to only test login, not permission.
+      using TestApplicationEngine engineStep1 = new(snapshot, settings, user, WitnessScope.Global);
+      CreateTrade(engineStep1, user);
+      engineStep1.State.Should().Be(VMState.HALT);
+      engineStep1.ResultStack.Should().HaveCount(1);
+
+      using TestApplicationEngine engineStep2 = new(snapshot, settings, owner, WitnessScope.Global);
+      engineStep2.ExecuteScript<Vendor>(c => c.adminCancelTrade(Common.TEST_TRADE_ID));
+      engineStep2.State.Should().Be(VMState.HALT);
+    }
+
+    [Fact]
+    public void Cancel_trade_success()
+    {
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      // Set WitnessScope as Global here to only test login, not permission.
+      using TestApplicationEngine engineStep1 = new(snapshot, settings, user, WitnessScope.Global);
+      CreateTrade(engineStep1, user);
+      engineStep1.State.Should().Be(VMState.HALT);
+      engineStep1.ResultStack.Should().HaveCount(1);
+
+      using TestApplicationEngine engineStep2 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep2.ExecuteScript<Vendor>(c => c.cancelTrade(Common.TEST_TRADE_ID));
+      engineStep2.State.Should().Be(VMState.HALT);
+      engineStep1.ResultStack.Should().HaveCount(1);
+    }
+
     // Create Trade and return expected trade object
     private static Common.Trade CreateTrade(TestApplicationEngine engine, UInt160 tradeCreator)
     {

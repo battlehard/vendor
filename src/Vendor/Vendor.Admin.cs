@@ -25,6 +25,7 @@ namespace Vendor
     public static void AdminCancelTrade(BigInteger tradeId)
     {
       CheckAdminAuthorization();
+      InternalCancelTrade(tradeId);
     }
   }
 }

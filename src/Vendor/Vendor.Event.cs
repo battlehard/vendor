@@ -16,5 +16,11 @@ namespace Vendor
     public delegate void OnTradeExecutedDelegate(BigInteger tradeId, BigInteger purchasePackages,
                                                   UInt160 payTokenHash, BigInteger payTokenAmount,
                                                   UInt160 receiveTokenHash, BigInteger receiveTokenAmount);
+
+    [DisplayName("TradeCancelled")]
+    public static event OnTradeCancelledDelegate OnTradeCancelled;
+    public delegate void OnTradeCancelledDelegate(BigInteger tradeId, UInt160 owner,
+                                                  UInt160 offerTokenHash, BigInteger returnOfferTokenAmount,
+                                                  UInt160 purchaseTokenHash, BigInteger returnPurchaseTokenAmount);
   }
 }

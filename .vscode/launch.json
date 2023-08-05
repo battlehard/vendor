@@ -33,7 +33,10 @@
         {
           "account": "@owner",
           "scopes": "CalledByEntry, CustomContracts",
-          "allowedcontracts": ["0xd2a4cff31913016155e38e474a2c06d08be276cf"] // GAS hash
+          "allowedcontracts": [
+            "0xd2a4cff31913016155e38e474a2c06d08be276cf", // GAS hash
+            "0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5" // NEO hash
+          ]
         }
       ],
       "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
@@ -53,7 +56,33 @@
         {
           "account": "@owner",
           "scopes": "CalledByEntry, CustomContracts",
-          "allowedcontracts": ["0xd2a4cff31913016155e38e474a2c06d08be276cf"] // GAS hash
+          "allowedcontracts": [
+            "0xd2a4cff31913016155e38e474a2c06d08be276cf", // GAS hash
+            "0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5" // NEO hash
+          ]
+        }
+      ],
+      "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
+    },
+    {
+      "name": "Debug_CancelTrade",
+      "type": "neo-contract",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Vendor/bin/sc/Vendor.nef",
+      "neo-express": "${workspaceFolder}/default.neo-express",
+      "invocation": {
+        "operation": "debug_CancelTrade",
+        "args": []
+      },
+      "storage": [],
+      "signers": [
+        {
+          "account": "@owner",
+          "scopes": "CalledByEntry, CustomContracts",
+          "allowedcontracts": [
+            "0xd2a4cff31913016155e38e474a2c06d08be276cf", // GAS hash
+            "0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5" // NEO hash
+          ]
         }
       ],
       "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
