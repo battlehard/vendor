@@ -11,6 +11,11 @@ namespace test
     public static readonly BigInteger TEN_GAS = 10_00000000;
     public static readonly BigInteger HUNDRED_GAS = 100_00000000;
 
+    public static readonly BigInteger TEST_TRADE_ID = 1;
+    public static readonly BigInteger TEST_OFFER_PACKAGES = 20;
+    public static readonly BigInteger TEST_PURCHASE_PACKAGES = 10;
+    public static readonly BigInteger TEST_OVER_PURCHASE_PACKAGES = 21;
+
     public struct Trade
     {
       public UInt160 owner;

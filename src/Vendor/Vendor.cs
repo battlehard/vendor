@@ -23,7 +23,7 @@ namespace Vendor
     /// <param name="offerTokenAmount">Total amount for sell with no decimal format. If the token use 8 decimal, then 1 token must input as 100000000</param>
     /// <param name="offerPackages">Number of packages for sell, must be evenly divisible</param>
     /// <param name="purchaseTokenHash">Script Hash of token that use for purchase</param>
-    /// <param name="offerTokpurchasePriceenHash">Price per package with no decimal format</param>
+    /// <param name="purchasePrice">Price per package with no decimal format</param>
     public static void CreateTrade(UInt160 offerTokenHash, BigInteger offerTokenAmount, BigInteger offerPackages, UInt160 purchaseTokenHash, BigInteger purchasePrice)
     {
       // Initialize variables
@@ -40,7 +40,7 @@ namespace Vendor
       // Lock offer token from user into vendor contract
       Safe17Transfer(offerTokenHash, sender, vendor, offerTokenAmount);
       // Create a trade object
-      Trade creatingTrade = new Trade
+      Trade creatingTrade = new()
       {
         owner = sender,
         offerTokenHash = offerTokenHash,
@@ -55,9 +55,33 @@ namespace Vendor
       OnTradeCreated(tradeId, creatingTrade);
     }
 
-    public static void ExecuteTrade()
+    /// <summary>
+    /// Execute a specific trade, by select amount of packages
+    /// </summary>
+    /// <param name="tradeId">TradeId of active trade</param>
+    /// <param name="purchasePackages">Number of packages to purchase</param>
+    public static void ExecuteTrade(BigInteger tradeId, BigInteger purchasePackages)
     {
-
+      // Get active trade, in case of no trade available, error message will be thrown.
+      Trade activeTrade = TradePoolStorage.Get(tradeId);
+      // Check availability
+      BigInteger availablePackages = activeTrade.offerPackages - activeTrade.soldPackages;
+      Assert(availablePackages >= purchasePackages, $"Insufficient packages: {purchasePackages} purchasing BUT {availablePackages} available");
+      // Initialize variables
+      var tx = (Transaction)Runtime.ScriptContainer;
+      UInt160 sender = tx.Sender;
+      UInt160 vendor = Runtime.ExecutingScriptHash;
+      BigInteger purchaseAmount = activeTrade.purchasePrice * purchasePackages;
+      BigInteger sellAmount = activeTrade.amountPerPackage * purchasePackages;
+      // Transfer purchasing token from purchaser to contract
+      Safe17Transfer(activeTrade.purchaseTokenHash, sender, vendor, purchaseAmount);
+      // Transfer buying token from contract to purchaser
+      Safe17Transfer(activeTrade.offerTokenHash, vendor, sender, sellAmount);
+      // Update sold packages
+      activeTrade.soldPackages += purchasePackages;
+      // Save Trade
+      TradePoolStorage.Put(tradeId, activeTrade);
+      OnTradeExecuted(tradeId, purchasePackages, activeTrade.purchaseTokenHash, purchaseAmount, activeTrade.offerTokenHash, sellAmount);
     }
 
     public static void CancelTrade()

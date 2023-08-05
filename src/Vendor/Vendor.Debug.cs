@@ -7,7 +7,6 @@ using Neo.SmartContract.Framework.Services;
 using System;
 using System.Numerics;
 
-#pragma warning disable CS8625 // Suppress known warning
 namespace Vendor
 {
   public partial class Vendor
@@ -15,7 +14,7 @@ namespace Vendor
     public static void Debug_TradePoolStorage()
     {
       IsOwner();
-      Trade mockTrade = new Trade
+      Trade mockTrade = new()
       {
         owner = GetContractOwner(),
         offerTokenHash = GAS.Hash,
@@ -26,21 +25,21 @@ namespace Vendor
         purchasePrice = 10,
         soldPackages = 0
       };
+      BigInteger tradeId = 1;
       try
       {
-        Trade notFoundTrade = TradePoolStorage.Get(1);
+        Trade notFoundTrade = TradePoolStorage.Get(tradeId);
       }
       catch (Exception e)
       {
         Runtime.Notify("Expected error", new object[] { e });
       }
-      TradePoolStorage.Put(1, mockTrade);
-      Trade queriedTrade = TradePoolStorage.Get(1);
-      Runtime.Notify("TradeID=1", new object[] { queriedTrade });
-      TradePoolStorage.Delete(1);
+      TradePoolStorage.Put(tradeId, mockTrade);
+      LogTradeData(tradeId);
+      TradePoolStorage.Delete(tradeId);
       try
       {
-        Trade notFoundTrade = TradePoolStorage.Get(1);
+        Trade notFoundTrade = TradePoolStorage.Get(tradeId);
       }
       catch (Exception e)
       {
@@ -57,5 +56,42 @@ namespace Vendor
       CreateTrade(GAS.Hash, HUNDRED_GAS, packages, GAS.Hash, TEN_GAS);
     }
 
+    public static void Debug_ExecuteTrade()
+    {
+      IsOwner();
+      BigInteger TEN_GAS = 10_00000000;
+      BigInteger HUNDRED_GAS = 100_00000000;
+      BigInteger packages = 20;
+      BigInteger tradeId = 1;
+      BigInteger overPurchasePackages = 21;
+      BigInteger halfPurchasePackages = 10;
+      CreateTrade(GAS.Hash, HUNDRED_GAS, packages, GAS.Hash, TEN_GAS);
+      try
+      {
+        ExecuteTrade(tradeId, overPurchasePackages);
+      }
+      catch (Exception e)
+      {
+        Runtime.Notify("Expected error", new object[] { e });
+      }
+      ExecuteTrade(tradeId, halfPurchasePackages);
+      LogTradeData(tradeId);
+      ExecuteTrade(tradeId, halfPurchasePackages);
+      LogTradeData(tradeId);
+      try
+      {
+        ExecuteTrade(tradeId, halfPurchasePackages);
+      }
+      catch (Exception e)
+      {
+        Runtime.Notify("Expected error", new object[] { e });
+      }
+    }
+
+    private static void LogTradeData(BigInteger tradeId)
+    {
+      Trade queriedTrade = TradePoolStorage.Get(tradeId);
+      Runtime.Notify($"TradeID={tradeId}", new object[] { queriedTrade });
+    }
   }
 }

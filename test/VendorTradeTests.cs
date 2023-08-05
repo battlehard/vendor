@@ -25,33 +25,34 @@ namespace test
   {
     readonly CheckpointFixture fixture;
     readonly ExpressChain chain;
+    readonly ProtocolSettings settings;
+    readonly UInt160 owner;
+    readonly UInt160 user;
+
+
 
     public VendorTradeTests(CheckpointFixture<VendorTradeTests> fixture)
     {
       this.fixture = fixture;
       this.chain = fixture.FindChain();
+      this.settings = chain.GetProtocolSettings();
+      this.owner = chain.GetDefaultAccount("owner").ToScriptHash(settings.AddressVersion);
+      this.user = chain.GetDefaultAccount("user").ToScriptHash(settings.AddressVersion);
     }
 
     [Fact]
     public void Create_trade()
     {
-      ProtocolSettings settings = chain.GetProtocolSettings();
-      UInt160 owner = chain.GetDefaultAccount("owner").ToScriptHash(settings.AddressVersion);
-
       using SnapshotCache snapshot = fixture.GetSnapshot();
       // Set WitnessScope as Global here to only test login, not permission.
       using TestApplicationEngine engine = new(snapshot, settings, owner, WitnessScope.Global);
-      UInt160 gasHash = NativeContract.GAS.Hash;
-      BigInteger hundredGas = Common.HUNDRED_GAS;
-      BigInteger tenGas = Common.TEN_GAS;
-      BigInteger offerPackages = 10;
-      engine.ExecuteScript<Vendor>(c => c.createTrade(gasHash, hundredGas, offerPackages, gasHash, tenGas));
+
+      Common.Trade expectedTrade = CreateTrade(engine, owner);
       engine.State.Should().Be(VMState.HALT);
       engine.ResultStack.Should().HaveCount(1);
       var storages = snapshot.GetContractStorages<Vendor>();
       var tradeMap = storages.StorageMap(Common.Prefix_Trade_Pool);
-      BigInteger tradeId = 1;
-      tradeMap.TryGetValue(tradeId.ToByteArray(), out StorageItem item).Should().BeTrue();
+      tradeMap.TryGetValue(Common.TEST_TRADE_ID.ToByteArray(), out StorageItem item).Should().BeTrue();
       StackItem storedTrade = BinarySerializer.Deserialize(item.Value, engine.Limits, engine.ReferenceCounter);
       // Convert stored data into contract parameter so that they can be could compared
       ContractParameter storedOwner = ((Struct)storedTrade)[0].ToParameter();
@@ -62,18 +63,6 @@ namespace test
       ContractParameter storedPurchaseTokenHash = ((Struct)storedTrade)[5].ToParameter();
       ContractParameter storedPurchasePrice = ((Struct)storedTrade)[6].ToParameter();
       ContractParameter storedSoldPackages = ((Struct)storedTrade)[7].ToParameter();
-      // Setup expected value
-      Common.Trade expectedTrade = new()
-      {
-        owner = owner,
-        offerTokenHash = gasHash,
-        offerTokenAmount = hundredGas,
-        offerPackages = offerPackages,
-        amountPerPackage = hundredGas / offerPackages,
-        purchaseTokenHash = gasHash,
-        purchasePrice = tenGas,
-        soldPackages = 0
-      };
       // Compare stored value against expected value
       storedOwner.ToString().Should().Be(ContractParameterParser.ConvertObject(expectedTrade.owner).ToString());
       storedOfferTokenHash.ToString().Should().Be(ContractParameterParser.ConvertObject(expectedTrade.offerTokenHash).ToString());
@@ -83,6 +72,84 @@ namespace test
       storedPurchaseTokenHash.ToString().Should().Be(ContractParameterParser.ConvertObject(expectedTrade.purchaseTokenHash).ToString());
       storedPurchasePrice.ToString().Should().Be(ContractParameterParser.ConvertObject(expectedTrade.purchasePrice).ToString());
       storedSoldPackages.ToString().Should().Be(ContractParameterParser.ConvertObject(expectedTrade.soldPackages).ToString());
+    }
+
+    [Fact]
+    public void Execute_not_found_trade()
+    {
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      // Set WitnessScope as Global here to only test login, not permission.
+      using TestApplicationEngine engine = new(snapshot, settings, user, WitnessScope.Global);
+
+      engine.ExecuteScript<Vendor>(c => c.executeTrade(Common.TEST_TRADE_ID, Common.TEST_PURCHASE_PACKAGES));
+      engine.State.Should().Be(VMState.FAULT);
+      engine.UncaughtException.GetString().Should().Contain($"Cannot find the tradeId: {Common.TEST_TRADE_ID}");
+    }
+
+    [Fact]
+    public void Execute_insufficient_trade()
+    {
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      // Set WitnessScope as Global here to only test login, not permission.
+      using TestApplicationEngine engineStep1 = new(snapshot, settings, owner, WitnessScope.Global);
+      CreateTrade(engineStep1, owner);
+      engineStep1.State.Should().Be(VMState.HALT);
+
+      using TestApplicationEngine engineStep2 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep2.ExecuteScript<Vendor>(c => c.executeTrade(Common.TEST_TRADE_ID, Common.TEST_OVER_PURCHASE_PACKAGES));
+      engineStep2.State.Should().Be(VMState.FAULT);
+      engineStep2.UncaughtException.GetString().Should().Contain($"Insufficient packages: {Common.TEST_OVER_PURCHASE_PACKAGES} purchasing BUT {Common.TEST_OFFER_PACKAGES} available");
+    }
+
+    [Fact]
+    public void Execute_success_trade()
+    {
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      // Set WitnessScope as Global here to only test login, not permission.
+      using TestApplicationEngine engineStep1 = new(snapshot, settings, owner, WitnessScope.Global);
+      CreateTrade(engineStep1, owner);
+      engineStep1.State.Should().Be(VMState.HALT);
+      engineStep1.ResultStack.Should().HaveCount(1);
+
+      using TestApplicationEngine engineStep2 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep2.ExecuteScript<Vendor>(c => c.executeTrade(Common.TEST_TRADE_ID, Common.TEST_PURCHASE_PACKAGES));
+      engineStep2.State.Should().Be(VMState.HALT);
+      engineStep2.ResultStack.Should().HaveCount(1);
+      var storages = snapshot.GetContractStorages<Vendor>();
+      var tradeMap = storages.StorageMap(Common.Prefix_Trade_Pool);
+      tradeMap.TryGetValue(Common.TEST_TRADE_ID.ToByteArray(), out StorageItem item).Should().BeTrue();
+      StackItem storedTrade = BinarySerializer.Deserialize(item.Value, engineStep2.Limits, engineStep2.ReferenceCounter);
+      // Convert stored data into contract parameter so that they can be could compared
+      ContractParameter storedSoldPackages = ((Struct)storedTrade)[7].ToParameter();
+      // Setup expected value after execute trade, purchase 5 sold should be 5.
+      Common.Trade expectedTrade = new()
+      {
+        soldPackages = Common.TEST_PURCHASE_PACKAGES
+      };
+      // Compare stored value against expected value
+      storedSoldPackages.ToString().Should().Be(ContractParameterParser.ConvertObject(expectedTrade.soldPackages).ToString());
+    }
+
+    // Create Trade and return expected trade object
+    private static Common.Trade CreateTrade(TestApplicationEngine engine, UInt160 tradeCreator)
+    {
+      UInt160 gasHash = NativeContract.GAS.Hash;
+      BigInteger hundredGas = Common.HUNDRED_GAS;
+      BigInteger tenGas = Common.TEN_GAS;
+      BigInteger offerPackages = Common.TEST_OFFER_PACKAGES;
+      engine.ExecuteScript<Vendor>(c => c.createTrade(gasHash, hundredGas, offerPackages, gasHash, tenGas));
+
+      return new()
+      {
+        owner = tradeCreator,
+        offerTokenHash = gasHash,
+        offerTokenAmount = hundredGas,
+        offerPackages = offerPackages,
+        amountPerPackage = hundredGas / offerPackages,
+        purchaseTokenHash = gasHash,
+        purchasePrice = tenGas,
+        soldPackages = 0
+      };
     }
   }
 }
