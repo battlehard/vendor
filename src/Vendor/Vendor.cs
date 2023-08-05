@@ -20,10 +20,10 @@ namespace Vendor
     /// Create a trade with any choice of tokens for offer and purchase in a vending machine style where tokens bundle in packages for sell with set price and currency
     /// </summary>
     /// <param name="offerTokenHash">Script hash of token for sell</param>
-    /// <param name="offerTokenAmount">Total amount for sell with no decimal format. If the token use 8 decimal, then 1 token must input as 100000000</param>
+    /// <param name="offerTokenAmount">Total amount for sell with BigInteger format. If the token use 8 decimal, then 1 token must input as 100000000</param>
     /// <param name="offerPackages">Number of packages for sell, must be evenly divisible</param>
     /// <param name="purchaseTokenHash">Script Hash of token that use for purchase</param>
-    /// <param name="purchasePrice">Price per package with no decimal format</param>
+    /// <param name="purchasePrice">Price per package with BigInteger format</param>
     public static void CreateTrade(UInt160 offerTokenHash, BigInteger offerTokenAmount, BigInteger offerPackages, UInt160 purchaseTokenHash, BigInteger purchasePrice)
     {
       // Initialize variables

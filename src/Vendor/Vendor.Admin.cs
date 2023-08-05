@@ -1,5 +1,4 @@
-﻿using Neo;
-using Neo.SmartContract.Framework.Services;
+﻿using Neo.SmartContract.Framework.Services;
 using System.Numerics;
 using static Vendor.Helpers;
 

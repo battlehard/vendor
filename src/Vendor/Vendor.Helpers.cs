@@ -1,7 +1,6 @@
 ﻿using Neo;
 using Neo.SmartContract.Framework.Services;
 using System.Numerics;
-using static Vendor.Helpers;
 using static Vendor.Transfer;
 
 namespace Vendor
