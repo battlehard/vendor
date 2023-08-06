@@ -6,7 +6,9 @@ namespace test
   static class Common
   {
     public static readonly byte[] Prefix_Owner = new byte[] { 0x01, 0x00 };
-    public static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x03 };
+    public static readonly byte[] Prefix_Trade_Height = new byte[] { 0x01, 0x02 };
+    public static readonly byte[] Prefix_Trade_Count = new byte[] { 0x01, 0x03 };
+    public static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x04 };
 
     public static readonly BigInteger TEN_GAS = 10_00000000;
     public static readonly BigInteger HUNDRED_GAS = 100_00000000;
@@ -15,6 +17,8 @@ namespace test
     public static readonly BigInteger TEST_OFFER_PACKAGES = 20;
     public static readonly BigInteger TEST_PURCHASE_PACKAGES = 10;
     public static readonly BigInteger TEST_OVER_PURCHASE_PACKAGES = 21;
+
+    public static readonly BigInteger MAX_PAGE_LIMIT = 50;
 
     public struct Trade
     {

@@ -1,4 +1,5 @@
 using Neo;
+using Neo.SmartContract.Framework;
 using System;
 
 namespace Vendor
@@ -16,6 +17,18 @@ namespace Vendor
       {
         throw new Exception(errorMessage);
       }
+    }
+
+    public static int ByteStringToInt(ByteString bs)
+    {
+      int result = 0;
+      byte[] data = Helper.ToByteArray(bs);
+      for (int i = 0; i < data.Length; i++)
+      {
+        result <<= 8; // Shift left by 8 bits
+        result |= data[i]; // OR with the next byte
+      }
+      return result;
     }
   }
 }

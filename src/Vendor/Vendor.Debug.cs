@@ -115,6 +115,28 @@ namespace Vendor
       CancelTrade(tradeId);
     }
 
+    public static void Debug_ListTrade()
+    {
+      IsOwner();
+      int tradeNum = 20;
+      for (int i = 0; i < tradeNum; i++)
+        CreateTrade(OFFER_TOKEN_HASH, OFFER_TOKEN_AMOUNT, OFFER_PACKAGES, PURCHASE_TOKEN_HASH, PURCHASE_PRICE);
+
+      try { ListTrade(0, 0); }
+      catch (Exception e)
+      { Runtime.Notify("Expected error", new object[] { e }); }
+      try { ListTrade(1, MAX_PAGE_LIMIT + 1); }
+      catch (Exception e)
+      { Runtime.Notify("Expected error", new object[] { e }); }
+      try { ListTrade(tradeNum + 1, MAX_PAGE_LIMIT); }
+      catch (Exception e)
+      { Runtime.Notify("Expected error", new object[] { e }); }
+
+      Assert(tradeNum == TradePoolStorage.Count(), $"Expected {tradeNum} trades");
+      Runtime.Notify("ListTrade(4, 4)", new object[] { ListTrade(4, 4) });
+      Runtime.Notify("ListTrade(5, 4)", new object[] { ListTrade(5, 4) });
+      Runtime.Notify("ListTrade(7, 3)", new object[] { ListTrade(7, 3) });
+    }
     private static void LogTradeData(BigInteger tradeId)
     {
       Trade queriedTrade = TradePoolStorage.Get(tradeId);

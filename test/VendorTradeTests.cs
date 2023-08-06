@@ -177,6 +177,31 @@ namespace test
       engineStep1.ResultStack.Should().HaveCount(1);
     }
 
+    [Fact]
+    public void List_page_with_limit_over_max()
+    {
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      TestApplicationEngine engineStep1 = new(snapshot, settings, user, WitnessScope.Global);
+      BigInteger tradeQuantity = Common.MAX_PAGE_LIMIT + 1;
+      for (BigInteger i = 0; i < tradeQuantity; i++)
+      {
+        engineStep1 = new(snapshot, settings, user, WitnessScope.Global);
+        CreateTrade(engineStep1, user);
+      }
+
+      // Check created trade quantity
+      var storages = snapshot.GetContractStorages<Vendor>();
+      storages.TryGetValue(Common.Prefix_Trade_Count, out StorageItem tradeCount).Should().BeTrue();
+      tradeCount.Should().Be(tradeQuantity);
+
+      using TestApplicationEngine engineStep2 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep2.ExecuteScript<Vendor>(c => c.listTrade(1, tradeCount)); // List more than max page limit.
+      engineStep2.State.Should().Be(VMState.FAULT);
+      engineStep2.UncaughtException.GetString().Should().Contain($"Input page limit exceed the max limit of {Common.MAX_PAGE_LIMIT}");
+    }
+
+    //TODO: Add more test case for ListTrade
+
     // Create Trade and return expected trade object
     private static Common.Trade CreateTrade(TestApplicationEngine engine, UInt160 tradeCreator)
     {
