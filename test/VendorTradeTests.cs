@@ -178,7 +178,7 @@ namespace test
     }
 
     [Fact]
-    public void List_page_with_limit_over_max()
+    public void List_page_with_failed_cases()
     {
       using SnapshotCache snapshot = fixture.GetSnapshot();
       TestApplicationEngine engineStep1 = new(snapshot, settings, user, WitnessScope.Global);
@@ -195,12 +195,20 @@ namespace test
       tradeCount.Should().Be(tradeQuantity);
 
       using TestApplicationEngine engineStep2 = new(snapshot, settings, user, WitnessScope.Global);
-      engineStep2.ExecuteScript<Vendor>(c => c.listTrade(1, tradeCount)); // List more than max page limit.
+      engineStep2.ExecuteScript<Vendor>(c => c.listTrade(1, tradeQuantity)); // List more than max page limit.
       engineStep2.State.Should().Be(VMState.FAULT);
       engineStep2.UncaughtException.GetString().Should().Contain($"Input page limit exceed the max limit of {Common.MAX_PAGE_LIMIT}");
-    }
 
-    //TODO: Add more test case for ListTrade
+      using TestApplicationEngine engineStep3 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep3.ExecuteScript<Vendor>(c => c.listTrade(0, tradeQuantity)); // List from page 0
+      engineStep3.State.Should().Be(VMState.FAULT);
+      engineStep3.UncaughtException.GetString().Should().Contain("Pagination data must be provided, pageNumber and pageSize must have at least 1");
+
+      using TestApplicationEngine engineStep4 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep4.ExecuteScript<Vendor>(c => c.listTrade(Common.MAX_PAGE_LIMIT, Common.MAX_PAGE_LIMIT)); // List page over the total pages
+      engineStep4.State.Should().Be(VMState.FAULT);
+      engineStep4.UncaughtException.GetString().Should().Contain($"Input page number exceed the totalPages of 2");
+    }
 
     // Create Trade and return expected trade object
     private static Common.Trade CreateTrade(TestApplicationEngine engine, UInt160 tradeCreator)
