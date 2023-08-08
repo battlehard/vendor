@@ -1,28 +1,4 @@
 import { u, wallet } from '@cityofzion/neon-core'
-import { INetworkType } from './interfaces'
-import { Network } from './network'
-
-export const getTokensOf = async (
-  network: INetworkType,
-  contractHash: string,
-  ownerHash: string
-): Promise<string[]> => {
-  const script = {
-    scriptHash: contractHash,
-    operation: 'tokensOf',
-    args: [
-      {
-        type: 'Hash160',
-        value: ownerHash,
-      },
-    ],
-  }
-  const tokensOfRes: any = await Network.read(network, [script])
-  const sessionId = tokensOfRes.session
-  const id = tokensOfRes.stack[0].id
-  const res = await Network.traverseIterator(network, sessionId, id)
-  return res
-}
 
 export const stackJsonToObject = (item: any) => {
   let obj: any = {}

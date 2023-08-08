@@ -7,8 +7,8 @@ import MainNavBar from '@/components/main-nav-bar'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Swappables App',
-  description: 'A portal to Swappables smart contract',
+  title: 'Vendor App',
+  description: 'A portal to Vendor smart contract',
 }
 
 export default function RootLayout({

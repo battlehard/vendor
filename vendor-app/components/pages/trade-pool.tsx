@@ -9,10 +9,10 @@ import {
   styled,
 } from '@mui/material'
 import {
-  ILegendsProperties,
-  LEGENDS_SCRIPT_HASH,
-  LegendsContract,
-} from '@/utils/neo/contracts/legends'
+  ITradeProperties,
+  VENDOR_SCRIPT_HASH,
+  VendorContract,
+} from '@/utils/neo/contracts/vendor'
 import React, { useEffect, useState } from 'react'
 import { useWallet } from '@/context/wallet-provider'
 import { wallet as NeonWallet } from '@cityofzion/neon-core'
@@ -70,7 +70,7 @@ const MessagePanel = ({ message }: MessagePanelProps) => {
   )
 }
 
-export default function NftPoolPage() {
+export default function TradePoolPage() {
   // Notification
   const [open, setOpen] = useState(false)
   const [severity, setSeverity] = useState<AlertColor>('success')
@@ -101,69 +101,59 @@ export default function NftPoolPage() {
 
   const { connectedWallet, network } = useWallet()
   const [loading, setLoading] = useState(true)
-  const [nftList, setNftList] = useState<ILegendsProperties[]>([])
+  const [tradeList, setTradeList] = useState<ITradeProperties[]>([])
   const [openModal, setOpenModal] = useState(false)
-  const handleModalOpen = (fromTokenId: string) => {
-    setSelectedPoolTokenId(fromTokenId)
+  const handleModalOpen = () => {
     setOpenModal(true)
-    fetchWalletNft()
   }
   const handleModalClose = () => {
-    setSelectedPoolTokenId('')
     setOpenModal(false)
   }
-  const [walletLoading, setWalletLoading] = useState(true)
-  const [walletNftList, setWalletNftList] = useState<ILegendsProperties[]>([])
 
-  const fetchContractNft = async () => {
+  const fetchListTrade = async () => {
     setLoading(true)
-    try {
-      const result = await new LegendsContract(network).getTokensOf(
-        LEGENDS_SCRIPT_HASH[network]
-      )
-      setNftList(result)
-    } catch (e: any) {
-      if (e.type !== undefined) {
-        showErrorPopup(`Error: ${e.type} ${e.description}`)
-      }
-      console.error(e)
-    }
+    // try {
+    //   const result = await new VendorContract(network).ListTrade(
+    //     VENDOR_SCRIPT_HASH[network]
+    //   )
+    //   setTradeList(result)
+    // } catch (e: any) {
+    //   if (e.type !== undefined) {
+    //     showErrorPopup(`Error: ${e.type} ${e.description}`)
+    //   }
+    //   console.error(e)
+    // }
 
     setLoading(false)
   }
 
-  const fetchWalletNft = async () => {
-    setWalletLoading(true)
-    const walletHash = NeonWallet.getScriptHashFromAddress(
-      connectedWallet?.account.address
-    )
-    try {
-      const result = await new LegendsContract(network).getTokensOf(walletHash)
-      setWalletNftList(result)
-    } catch (e: any) {
-      if (e.type !== undefined) {
-        showErrorPopup(`Error: ${e.type} ${e.description}`)
-      }
-      console.error(e)
-    }
-
-    setWalletLoading(false)
-  }
-
   useEffect(() => {
-    fetchContractNft()
+    fetchListTrade()
   }, [])
 
-  const [selectedPoolTokenId, setSelectedPoolTokenId] = useState('')
-  const handleTrade = async (walletTokenId: string) => {
+  const handleCreateTrade = async () => {
     if (connectedWallet) {
       try {
-        const txid = await new LegendsContract(network).Trade(
-          connectedWallet,
-          walletTokenId,
-          selectedPoolTokenId
-        )
-        showSuccessPopup(txid)
+        // const txid = await new VendorContract(network).CreateTrade(
+        //   connectedWallet,
+        // )
+        // showSuccessPopup(txid)
+      } catch (e: any) {
+        if (e.type !== undefined) {
+          showErrorPopup(`Error: ${e.type} ${e.description}`)
+        }
+        console.log(e)
+      }
+    }
+  }
+
+  const handleExecuteTrade = async (tradeId: number) => {
+    if (connectedWallet) {
+      try {
+        // const txid = await new VendorContract(network).ExecuteTrade(
+        //   connectedWallet,
+        // )
+        // showSuccessPopup(txid)
       } catch (e: any) {
         if (e.type !== undefined) {
           showErrorPopup(`Error: ${e.type} ${e.description}`)
@@ -175,30 +165,55 @@ export default function NftPoolPage() {
 
   return (
     <Box sx={{ width: '100%' }}>
+      <Container>
+        <Button
+          disabled={!connectedWallet}
+          variant="outlined"
+          onClick={handleModalOpen}
+        >
+          Create Trade
+        </Button>
+      </Container>
       {loading && <MessagePanel message="Loading" />}
-      {!loading && nftList.length == 0 && (
-        <MessagePanel message="No NFT in the pool" />
+      {!loading && tradeList.length == 0 && (
+        <MessagePanel message="No Trade in the pool" />
       )}
-      {!loading && nftList.length > 0 && (
+      {!loading && tradeList.length > 0 && (
         <Container>
+          <Button
+            disabled={!connectedWallet}
+            variant="outlined"
+            onClick={handleModalOpen}
+          >
+            Create Trade
+          </Button>
           <ContainerRowForPool>
-            <Div>Image</Div>
-            <Div>Name</Div>
+            <Div>Trade ID</Div>
             <Div>Owner Address</Div>
-            <Div>Action</Div>
+            <Div>Offer Token Hash</Div>
+            <Div>Amount Per Package</Div>
+            <Div>Offer Packages</Div>
+            <Div>Sold Packages</Div>
+            <Div>Purchase Token Hash</Div>
+            <Div>Purchase Price</Div>
           </ContainerRowForPool>
-          {nftList.map((nft, index) => {
+          {tradeList.map((trade, index) => {
             return (
               <ContainerRowForPool key={index}>
-                <img src={nft.image} alt={nft.name} width={150} />
-                <Div>{nft.name}</Div>
-                <Div>{nft.owner}</Div>
+                <Div>{trade.id}</Div>
+                <Div>{trade.owner}</Div>
+                <Div>{trade.offerTokenHash}</Div>
+                <Div>{trade.amountPerPackage}</Div>
+                <Div>{trade.offerPackages}</Div>
+                <Div>{trade.soldPackages}</Div>
+                <Div>{trade.purchaseTokenHash}</Div>
+                <Div>{trade.purchasePrice}</Div>
                 <Div>
                   <Button
                     disabled={!connectedWallet}
                     variant="outlined"
                     onClick={() => {
-                      handleModalOpen(nft.name)
+                      handleExecuteTrade(trade.id)
                     }}
                   >
                     Trade
@@ -216,40 +231,19 @@ export default function NftPoolPage() {
       >
         <Box sx={modalStyle}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Your Swappables NFTs
+            Trade Creation
           </Typography>
-          {walletLoading && <MessagePanel message="Loading" />}
-          {!walletLoading && walletNftList.length == 0 && (
-            <MessagePanel message="No NFT in your wallet" />
-          )}
-          {!walletLoading && walletNftList.length > 0 && (
-            <Container>
-              <ContainerRowForWallet>
-                <Div>Image</Div>
-                <Div>Name</Div>
-                <Div>Action</Div>
-              </ContainerRowForWallet>
-              {walletNftList.map((nft, index) => {
-                return (
-                  <ContainerRowForWallet key={index}>
-                    <img src={nft.image} alt={nft.name} width={75} />
-                    <Div>{nft.name}</Div>
-                    <Div>
-                      <Button
-                        disabled={!connectedWallet}
-                        variant="outlined"
-                        onClick={() => {
-                          handleTrade(nft.name)
-                        }}
-                      >
-                        Select
-                      </Button>
-                    </Div>
-                  </ContainerRowForWallet>
-                )
-              })}
-            </Container>
-          )}
+          <Container>
+            <Button
+              disabled={!connectedWallet}
+              variant="outlined"
+              onClick={() => {
+                handleCreateTrade()
+              }}
+            >
+              Invoke
+            </Button>
+          </Container>
         </Box>
       </Modal>
       <Notification
