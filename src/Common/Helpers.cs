@@ -19,9 +19,9 @@ namespace Vendor
       }
     }
 
-    public static int ByteStringToInt(ByteString bs)
+    public static ulong ByteStringToUlong(ByteString bs)
     {
-      int result = 0;
+      ulong result = 0;
       byte[] data = Helper.ToByteArray(bs);
       for (int i = 0; i < data.Length; i++)
       {

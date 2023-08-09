@@ -47,8 +47,8 @@ namespace Vendor
         BigInteger tradeId = tradeIdsList[i];
         Trade trade = tradeMap[tradeId];
         Map<string, object> tradeObject = new();
-        // tradeId automatically convert to ByteString even without casting, so need to explicitly convert to int
-        tradeObject["id"] = ByteStringToInt((ByteString)tradeId);
+        // tradeId automatically convert to ByteString even without casting, so need to explicitly convert to ulong
+        tradeObject["id"] = ByteStringToUlong((ByteString)tradeId);
         tradeObject["owner"] = trade.owner;
         tradeObject["offerTokenHash"] = trade.offerTokenHash;
         tradeObject["offerTokenAmount"] = trade.offerTokenAmount;
