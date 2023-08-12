@@ -24,6 +24,8 @@ export const stackJsonToObject = (item: any) => {
 
       if (key === 'owner') {
         value = base64ToAddress(value)
+      } else if (key === 'offerTokenHash' || key === 'purchaseTokenHash') {
+        value = '0x' + base64ToHash160(value)
       } else {
         switch (valueType) {
           case 'ByteString':
@@ -56,3 +58,11 @@ export const base64ToHash160 = (str: string) => u.reverseHex(u.base642hex(str))
 
 export const base64ToString = (str: string) =>
   u.HexString.fromBase64(str).toAscii().toString()
+
+export const getBigIntegerForm = (amount: number, decimal: number) => {
+  return u.BigInteger.fromDecimal(amount, decimal)
+}
+
+export const getDecimalForm = (amount: number, decimal: number) => {
+  return amount / (1 * Math.pow(10, decimal))
+}

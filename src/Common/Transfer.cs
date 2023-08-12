@@ -16,27 +16,31 @@ namespace Vendor
 
     public static void Safe11Transfer(UInt160 contractHash, UInt160 to, ByteString tokenId)
     {
+      string contractAddress = contractHash.ToAddress();
+      string failedMessage = $"{NEP11_TRANSFER_FAILED}: {contractAddress}";
       try
       {
         bool result = (bool)Contract.Call(contractHash, TRANSFER_METHOD, CallFlags.All, new object[] { to, tokenId, null });
-        Assert(result, NEP11_TRANSFER_FAILED);
+        Assert(result, failedMessage);
       }
       catch (Exception)
       {
-        Assert(false, NEP11_TRANSFER_FAILED);
+        Assert(false, failedMessage);
       }
     }
 
     public static void Safe17Transfer(UInt160 contractHash, UInt160 from, UInt160 to, BigInteger amount)
     {
+      string contractAddress = contractHash.ToAddress();
+      string failedMessage = $"{NEP17_TRANSFER_FAILED}: {contractAddress}";
       try
       {
         var result = (bool)Contract.Call(contractHash, TRANSFER_METHOD, CallFlags.All, new object[] { from, to, amount, null });
-        Assert(result, NEP17_TRANSFER_FAILED);
+        Assert(result, failedMessage);
       }
       catch (Exception)
       {
-        Assert(false, NEP17_TRANSFER_FAILED);
+        Assert(false, failedMessage);
       }
     }
 #pragma warning restore CS8625 // Suppress known warning

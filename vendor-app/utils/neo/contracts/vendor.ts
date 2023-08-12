@@ -1,4 +1,4 @@
-import { MAINNET, TESTNET } from '../constant'
+import { GAS_SCRIPT_HASH, MAINNET, TESTNET } from '../constant'
 import {
   IConnectedWallet,
   IInvokeScriptJson,
@@ -9,6 +9,7 @@ import { WalletAPI } from '../wallet'
 import { stackJsonToObject } from '../helpers'
 import { Network } from '../network'
 import { wallet as NeonWallet, tx } from '@cityofzion/neon-core'
+import { MAX_PAGE_LIMIT } from '@/components/constant'
 
 export enum AdminWhiteListAction {
   ADD = 'Add',
@@ -30,6 +31,12 @@ export interface ITradeProperties {
   purchaseTokenHash: string
   purchasePrice: number
   soldPackages: number
+}
+
+export interface ITradeListPagination {
+  totalPages: number
+  totalTrades: number
+  tradeList: ITradeProperties[]
 }
 
 export class VendorContract {
@@ -123,7 +130,11 @@ export class VendorContract {
             connectedWallet.account.address
           ),
           scopes: tx.WitnessScope.CustomContracts,
-          allowedContracts: [this.contractHash], // This scope allow the contract transfer tokens out from user's wallet
+          // This scope allow the contract transfer tokens out from user's wallet
+          allowedContracts: [
+            GAS_SCRIPT_HASH, // Give permission to transfer fee from user's wallet to contract
+            offerTokenHash, // Give permission to asset that need to transfer from user's wallet to contract
+          ],
         },
       ],
     }
@@ -132,5 +143,28 @@ export class VendorContract {
       connectedWallet.account.address,
       invokeScript
     )
+  }
+
+  ListTrade = async (
+    currentPage: number = 1,
+    pageItemsLimit: number = MAX_PAGE_LIMIT
+  ): Promise<ITradeListPagination> => {
+    const invokeScript: IInvokeScriptJson = {
+      operation: 'listTrade',
+      scriptHash: this.contractHash,
+      args: [
+        {
+          type: 'Integer',
+          value: currentPage,
+        },
+        {
+          type: 'Integer',
+          value: pageItemsLimit,
+        },
+      ],
+    }
+
+    const res = await Network.read(this.network, [invokeScript])
+    return stackJsonToObject(res.stack[0])
   }
 }
