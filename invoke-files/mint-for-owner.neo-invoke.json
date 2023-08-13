@@ -1,7 +1,0 @@
-[
-  {
-    "contract": "Legends",
-    "operation": "mint",
-    "args": ["https://host.com/LegendsOwner.jpg", "LegendsOwner", "@owner"]
-  }
-]

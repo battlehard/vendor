@@ -1,40 +1,31 @@
-using Neo.VM;
-using Neo.VM.Types;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Text;
+using Neo;
+using System.Numerics;
 
 namespace test
 {
   static class Common
   {
     public static readonly byte[] Prefix_Owner = new byte[] { 0x01, 0x00 };
-    public static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x02 };
-    public static readonly string LEGENDS_ONE = "LegendsOne";
-    public static readonly string LEGENDS_OWNER = "LegendsOwner";
-    public static readonly string LEGENDS_ADMIN = "LegendsAdmin";
-    public static readonly string LEGENDS_USER = "LegendsUser";
-    public static readonly string LEGENDS_NOT_EXIST = "LegendsNotExist";
+    public static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x03 };
 
-    /// <summary>
-    /// Use for extract StackItem that store Map<string, object> data type. e.g. return value from Properties
-    /// </summary>
-    /// <param name="stackItem">Must be a Map<string, object> type</param>
-    public static string GetStringValueFromMapKey(StackItem stackItem, string searchKey)
+    public static readonly BigInteger TEN_GAS = 10_00000000;
+    public static readonly BigInteger HUNDRED_GAS = 100_00000000;
+
+    public static readonly BigInteger TEST_TRADE_ID = 1;
+    public static readonly BigInteger TEST_OFFER_PACKAGES = 20;
+    public static readonly BigInteger TEST_PURCHASE_PACKAGES = 10;
+    public static readonly BigInteger TEST_OVER_PURCHASE_PACKAGES = 21;
+
+    public struct Trade
     {
-      JObject jObject = JObject.Parse(stackItem.ToJson().ToString());
-      JArray mapItems = (JArray)jObject["value"];
-      foreach (var item in mapItems)
-      {
-        byte[] keyBytes = Convert.FromBase64String(item["key"]["value"].ToString());
-        byte[] valueBytes = Convert.FromBase64String(item["value"]["value"].ToString());
-
-        string key = Encoding.UTF8.GetString(keyBytes);
-        string value = Encoding.UTF8.GetString(valueBytes);
-
-        if (key == searchKey) return value;
-      }
-      return null;
+      public UInt160 owner;
+      public UInt160 offerTokenHash;
+      public BigInteger offerTokenAmount;
+      public BigInteger offerPackages;
+      public BigInteger amountPerPackage;
+      public UInt160 purchaseTokenHash;
+      public BigInteger purchasePrice;
+      public BigInteger soldPackages;
     }
   }
 }

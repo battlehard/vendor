@@ -5,53 +5,87 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Mint with two arguments",
+      "name": "Debug_TradePoolStorage",
       "type": "neo-contract",
       "request": "launch",
-      "program": "${workspaceFolder}/src/Legends/bin/sc/Legends.nef",
+      "program": "${workspaceFolder}/src/Vendor/bin/sc/Vendor.nef",
       "neo-express": "${workspaceFolder}/default.neo-express",
       "invocation": {
-        "operation": "mint",
-        "args": ["https://host.com/image.jpg", "LegendsName", null]
+        "operation": "debug_TradePoolStorage",
+        "args": []
       },
       "storage": [],
       "signers": ["@owner"],
-      "checkpoint": "${workspaceFolder}/checkpoints/legends-deployed.neoxp-checkpoint"
+      "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
     },
     {
-      "name": "Burn success",
+      "name": "Debug_CreateTrade",
       "type": "neo-contract",
       "request": "launch",
-      "program": "${workspaceFolder}/src/Legends/bin/sc/Legends.nef",
+      "program": "${workspaceFolder}/src/Vendor/bin/sc/Vendor.nef",
       "neo-express": "${workspaceFolder}/default.neo-express",
       "invocation": {
-        "operation": "burn",
-        "args": ["LegendsOne"]
-      },
-      "storage": [],
-      "signers": ["@owner"],
-      "checkpoint": "${workspaceFolder}/checkpoints/legends-deployed.neoxp-checkpoint"
-    },
-    {
-      "name": "Trade success",
-      "type": "neo-contract",
-      "request": "launch",
-      "program": "${workspaceFolder}/src/Legends/bin/sc/Legends.nef",
-      "neo-express": "${workspaceFolder}/default.neo-express",
-      "invocation": {
-        "operation": "trade",
-        "args": ["LegendsOwner", "LegendsOne"]
+        "operation": "debug_CreateTrade",
+        "args": []
       },
       "storage": [],
       "signers": [
         {
           "account": "@owner",
           "scopes": "CalledByEntry, CustomContracts",
-          // Legends contract hash. Need to update to actual value based on checkpoint which re-generated frequently.
-          "allowedcontracts": ["0xd0ecc2cacdf774ac1b1c8f28797bf732ebba9b79"]
+          "allowedcontracts": [
+            "0xd2a4cff31913016155e38e474a2c06d08be276cf", // GAS hash
+            "0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5" // NEO hash
+          ]
         }
       ],
-      "checkpoint": "${workspaceFolder}/checkpoints/legends-minted-to-wallet.neoxp-checkpoint"
+      "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
+    },
+    {
+      "name": "Debug_ExecuteTrade",
+      "type": "neo-contract",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Vendor/bin/sc/Vendor.nef",
+      "neo-express": "${workspaceFolder}/default.neo-express",
+      "invocation": {
+        "operation": "debug_ExecuteTrade",
+        "args": []
+      },
+      "storage": [],
+      "signers": [
+        {
+          "account": "@owner",
+          "scopes": "CalledByEntry, CustomContracts",
+          "allowedcontracts": [
+            "0xd2a4cff31913016155e38e474a2c06d08be276cf", // GAS hash
+            "0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5" // NEO hash
+          ]
+        }
+      ],
+      "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
+    },
+    {
+      "name": "Debug_CancelTrade",
+      "type": "neo-contract",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Vendor/bin/sc/Vendor.nef",
+      "neo-express": "${workspaceFolder}/default.neo-express",
+      "invocation": {
+        "operation": "debug_CancelTrade",
+        "args": []
+      },
+      "storage": [],
+      "signers": [
+        {
+          "account": "@owner",
+          "scopes": "CalledByEntry, CustomContracts",
+          "allowedcontracts": [
+            "0xd2a4cff31913016155e38e474a2c06d08be276cf", // GAS hash
+            "0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5" // NEO hash
+          ]
+        }
+      ],
+      "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
     }
   ]
 }

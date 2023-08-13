@@ -1,6 +1,6 @@
 [
   {
-    "contract": "Legends",
+    "contract": "Vendor",
     "operation": "addAdminWhiteList",
     "args": ["@admin"]
   }

@@ -1,7 +1,7 @@
 using Neo;
 using System;
 
-namespace Swappables
+namespace Vendor
 {
   public class Helpers
   {

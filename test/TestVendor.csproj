@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <NeoContractReference Include="..\src\Legends\Legends.csproj" />
+    <NeoContractReference Include="..\src\Vendor\Vendor.csproj" />
   </ItemGroup>
 
   <ItemGroup>
