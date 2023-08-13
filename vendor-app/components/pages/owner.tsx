@@ -5,11 +5,11 @@ import TabPanel, { ITabPage } from '../tab-panel'
 import { useWallet } from '@/context/wallet-provider'
 import {
   AdminWhiteListAction,
-  LegendsContract,
-} from '@/utils/neo/contracts/legends'
+  VendorContract,
+} from '@/utils/neo/contracts/vendor'
 import React, { ChangeEvent, useState } from 'react'
 import Notification from '../notification'
-import { HASH160_PATTERN } from '../constant'
+import { NUMBER_PATTERN } from '../constant'
 
 export default function OwnerPage() {
   // Notification
@@ -50,7 +50,7 @@ export default function OwnerPage() {
       const value = event.target.value
       setInputWalletHash(value)
       if (value.length > 0) {
-        setIsValidHash(HASH160_PATTERN.test(value))
+        setIsValidHash(NUMBER_PATTERN.test(value))
       } else {
         setIsValidHash(true)
       }
@@ -65,7 +65,7 @@ export default function OwnerPage() {
     const invoke = async () => {
       if (connectedWallet) {
         try {
-          const txid = await new LegendsContract(network).ModifyAdminWhiteList(
+          const txid = await new VendorContract(network).ModifyAdminWhiteList(
             connectedWallet,
             inputWalletHash,
             adminWhiteListAction

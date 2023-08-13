@@ -1,28 +1,4 @@
 import { u, wallet } from '@cityofzion/neon-core'
-import { INetworkType } from './interfaces'
-import { Network } from './network'
-
-export const getTokensOf = async (
-  network: INetworkType,
-  contractHash: string,
-  ownerHash: string
-): Promise<string[]> => {
-  const script = {
-    scriptHash: contractHash,
-    operation: 'tokensOf',
-    args: [
-      {
-        type: 'Hash160',
-        value: ownerHash,
-      },
-    ],
-  }
-  const tokensOfRes: any = await Network.read(network, [script])
-  const sessionId = tokensOfRes.session
-  const id = tokensOfRes.stack[0].id
-  const res = await Network.traverseIterator(network, sessionId, id)
-  return res
-}
 
 export const stackJsonToObject = (item: any) => {
   let obj: any = {}
@@ -48,6 +24,8 @@ export const stackJsonToObject = (item: any) => {
 
       if (key === 'owner') {
         value = base64ToAddress(value)
+      } else if (key === 'offerTokenHash' || key === 'purchaseTokenHash') {
+        value = '0x' + base64ToHash160(value)
       } else {
         switch (valueType) {
           case 'ByteString':
@@ -80,3 +58,11 @@ export const base64ToHash160 = (str: string) => u.reverseHex(u.base642hex(str))
 
 export const base64ToString = (str: string) =>
   u.HexString.fromBase64(str).toAscii().toString()
+
+export const getBigIntegerForm = (amount: number, decimal: number) => {
+  return u.BigInteger.fromDecimal(amount, decimal)
+}
+
+export const getDecimalForm = (amount: number, decimal: number) => {
+  return amount / (1 * Math.pow(10, decimal))
+}

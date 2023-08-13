@@ -87,6 +87,21 @@ namespace test
     }
 
     [Fact]
+    public void Execute_zero_trade()
+    {
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      // Set WitnessScope as Global here to only test login, not permission.
+      using TestApplicationEngine engineStep1 = new(snapshot, settings, owner, WitnessScope.Global);
+      CreateTrade(engineStep1, owner);
+      engineStep1.State.Should().Be(VMState.HALT);
+
+      using TestApplicationEngine engineStep2 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep2.ExecuteScript<Vendor>(c => c.executeTrade(Common.TEST_TRADE_ID, 0));
+      engineStep2.State.Should().Be(VMState.FAULT);
+      engineStep2.UncaughtException.GetString().Should().Contain("Purchase packages must be at least 1");
+    }
+
+    [Fact]
     public void Execute_insufficient_trade()
     {
       using SnapshotCache snapshot = fixture.GetSnapshot();
@@ -175,6 +190,39 @@ namespace test
       engineStep2.ExecuteScript<Vendor>(c => c.cancelTrade(Common.TEST_TRADE_ID));
       engineStep2.State.Should().Be(VMState.HALT);
       engineStep1.ResultStack.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void List_page_with_failed_cases()
+    {
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      TestApplicationEngine engineStep1 = new(snapshot, settings, user, WitnessScope.Global);
+      BigInteger tradeQuantity = Common.MAX_PAGE_LIMIT + 1;
+      for (BigInteger i = 0; i < tradeQuantity; i++)
+      {
+        engineStep1 = new(snapshot, settings, user, WitnessScope.Global);
+        CreateTrade(engineStep1, user);
+      }
+
+      // Check created trade quantity
+      var storages = snapshot.GetContractStorages<Vendor>();
+      storages.TryGetValue(Common.Prefix_Trade_Count, out StorageItem tradeCount).Should().BeTrue();
+      tradeCount.Should().Be(tradeQuantity);
+
+      using TestApplicationEngine engineStep2 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep2.ExecuteScript<Vendor>(c => c.listTrade(1, tradeQuantity)); // List more than max page limit.
+      engineStep2.State.Should().Be(VMState.FAULT);
+      engineStep2.UncaughtException.GetString().Should().Contain($"Input page limit exceed the max limit of {Common.MAX_PAGE_LIMIT}");
+
+      using TestApplicationEngine engineStep3 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep3.ExecuteScript<Vendor>(c => c.listTrade(0, tradeQuantity)); // List from page 0
+      engineStep3.State.Should().Be(VMState.FAULT);
+      engineStep3.UncaughtException.GetString().Should().Contain("Pagination data must be provided, pageNumber and pageSize must have at least 1");
+
+      using TestApplicationEngine engineStep4 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep4.ExecuteScript<Vendor>(c => c.listTrade(Common.MAX_PAGE_LIMIT, Common.MAX_PAGE_LIMIT)); // List page over the total pages
+      engineStep4.State.Should().Be(VMState.FAULT);
+      engineStep4.UncaughtException.GetString().Should().Contain($"Input page number exceed the totalPages of 2");
     }
 
     // Create Trade and return expected trade object

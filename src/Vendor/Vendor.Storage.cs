@@ -13,8 +13,9 @@ namespace Vendor
     private static readonly byte[] Prefix_Owner = new byte[] { 0x01, 0x00 };
     private static readonly byte[] Prefix_Admin_White_List = new byte[] { 0x01, 0x01 };
     private static readonly byte[] Prefix_Trade_Height = new byte[] { 0x01, 0x02 };
-    private static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x03 };
-    private static readonly byte[] Prefix_Create_Trade_Fee = new byte[] { 0x01, 0x04 };
+    private static readonly byte[] Prefix_Trade_Count = new byte[] { 0x01, 0x03 };
+    private static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x04 };
+    private static readonly byte[] Prefix_Create_Trade_Fee = new byte[] { 0x01, 0x05 };
 
     /// <summary>
     /// Class <c>AdminWhiteListStorage</c>
@@ -62,12 +63,16 @@ namespace Vendor
       {
         StorageMap tradesMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
         tradesMap.Put(tradeId.ToByteArray(), StdLib.Serialize(trade));
+        // Increase count
+        Storage.Put(Storage.CurrentContext, Prefix_Trade_Count, (BigInteger)Storage.Get(Storage.CurrentContext, Prefix_Trade_Count) + 1);
       }
 
       internal static void Delete(BigInteger tradeId)
       {
         StorageMap tradesMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
         tradesMap.Delete(tradeId.ToByteArray());
+        // Decrease count
+        Storage.Put(Storage.CurrentContext, Prefix_Trade_Count, (BigInteger)Storage.Get(Storage.CurrentContext, Prefix_Trade_Count) - 1);
       }
 
       internal static Trade Get(BigInteger tradeId)
@@ -76,6 +81,31 @@ namespace Vendor
         byte[] id = tradeId.ToByteArray();
         Assert(tradesMap[id] != null, $"Cannot find the tradeId: {tradeId}");
         return (Trade)StdLib.Deserialize(tradesMap[id]);
+      }
+
+      internal static BigInteger Count()
+      {
+        return (BigInteger)Storage.Get(Storage.CurrentContext, Prefix_Trade_Count);
+      }
+
+      internal static Map<BigInteger, Trade> Map(BigInteger skipCount, BigInteger pageSize)
+      {
+        StorageMap tradesMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
+        Iterator keys = tradesMap.Find(FindOptions.KeysOnly | FindOptions.RemovePrefix);
+        Map<BigInteger, Trade> selectedTrade = new();
+        BigInteger foundKeySeq = 0;
+        while (keys.Next())
+        {
+          if (foundKeySeq >= skipCount && foundKeySeq < (skipCount + pageSize))
+          {
+            BigInteger tradeId = (BigInteger)keys.Value;
+            selectedTrade[tradeId] = Get(tradeId);
+          }
+          if (selectedTrade.Count >= pageSize)
+            break;
+          foundKeySeq++;
+        }
+        return selectedTrade;
       }
     }
 
