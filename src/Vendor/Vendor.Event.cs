@@ -9,7 +9,10 @@ namespace Vendor
   {
     [DisplayName("TradeCreated")]
     public static event OnTradeCreatedDelegate OnTradeCreated;
-    public delegate void OnTradeCreatedDelegate(BigInteger tradeId, Trade creatingTrade);
+    public delegate void OnTradeCreatedDelegate(BigInteger tradeId, UInt160 owner,
+                                                  UInt160 offerTokenHash, BigInteger offerTokenAmount,
+                                                  BigInteger offerPackages, BigInteger amountPerPackage,
+                                                  UInt160 purchaseTokenHash, BigInteger purchasePrice);
 
     [DisplayName("TradeExecuted")]
     public static event OnTradeExecutedDelegate OnTradeExecuted;

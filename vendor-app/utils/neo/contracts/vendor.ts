@@ -167,4 +167,43 @@ export class VendorContract {
     const res = await Network.read(this.network, [invokeScript])
     return stackJsonToObject(res.stack[0])
   }
+
+  ExecuteTrade = async (
+    connectedWallet: IConnectedWallet,
+    tradeId: number,
+    purchaseTokenHash: string,
+    purchasePackages: number
+  ): Promise<string> => {
+    const invokeScript: IInvokeScriptJson = {
+      operation: 'executeTrade',
+      scriptHash: this.contractHash,
+      args: [
+        {
+          type: 'Integer',
+          value: tradeId,
+        },
+        {
+          type: 'Integer',
+          value: purchasePackages,
+        },
+      ],
+      signers: [
+        {
+          account: NeonWallet.getScriptHashFromAddress(
+            connectedWallet.account.address
+          ),
+          scopes: tx.WitnessScope.CustomContracts,
+          // This scope allow the contract transfer tokens out from user's wallet
+          allowedContracts: [
+            purchaseTokenHash, // Give permission to asset that need to transfer from user's wallet to contract
+          ],
+        },
+      ],
+    }
+
+    return new WalletAPI(connectedWallet.key).invoke(
+      connectedWallet.account.address,
+      invokeScript
+    )
+  }
 }

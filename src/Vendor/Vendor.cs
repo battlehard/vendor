@@ -52,7 +52,9 @@ namespace Vendor
         soldPackages = 0
       };
       TradePoolStorage.Put(tradeId, creatingTrade);
-      OnTradeCreated(tradeId, creatingTrade);
+      OnTradeCreated(tradeId, creatingTrade.owner, creatingTrade.offerTokenHash, creatingTrade.offerTokenAmount,
+                      creatingTrade.offerPackages, creatingTrade.amountPerPackage, creatingTrade.purchaseTokenHash,
+                      creatingTrade.purchasePrice);
     }
 
     /// <summary>
@@ -62,6 +64,7 @@ namespace Vendor
     /// <param name="purchasePackages">Number of packages to purchase</param>
     public static void ExecuteTrade(BigInteger tradeId, BigInteger purchasePackages)
     {
+      Assert(purchasePackages > 0, "Purchase packages must be at least 1");
       // Get active trade, in case of no trade available, error message will be thrown.
       Trade activeTrade = TradePoolStorage.Get(tradeId);
       // Check availability

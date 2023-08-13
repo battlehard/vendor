@@ -87,6 +87,21 @@ namespace test
     }
 
     [Fact]
+    public void Execute_zero_trade()
+    {
+      using SnapshotCache snapshot = fixture.GetSnapshot();
+      // Set WitnessScope as Global here to only test login, not permission.
+      using TestApplicationEngine engineStep1 = new(snapshot, settings, owner, WitnessScope.Global);
+      CreateTrade(engineStep1, owner);
+      engineStep1.State.Should().Be(VMState.HALT);
+
+      using TestApplicationEngine engineStep2 = new(snapshot, settings, user, WitnessScope.Global);
+      engineStep2.ExecuteScript<Vendor>(c => c.executeTrade(Common.TEST_TRADE_ID, 0));
+      engineStep2.State.Should().Be(VMState.FAULT);
+      engineStep2.UncaughtException.GetString().Should().Contain("Purchase packages must be at least 1");
+    }
+
+    [Fact]
     public void Execute_insufficient_trade()
     {
       using SnapshotCache snapshot = fixture.GetSnapshot();

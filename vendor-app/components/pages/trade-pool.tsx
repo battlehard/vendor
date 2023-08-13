@@ -4,6 +4,7 @@ import {
   AlertColor,
   Box,
   Button,
+  Input,
   Modal,
   TextField,
   Typography,
@@ -12,24 +13,27 @@ import {
 import { ITradeProperties, VendorContract } from '@/utils/neo/contracts/vendor'
 import React, { ChangeEvent, useEffect, useState } from 'react'
 import { useWallet } from '@/context/wallet-provider'
-import { wallet as NeonWallet } from '@cityofzion/neon-core'
 import Notification from '../notification'
 import { HASH160_PATTERN, NUMBER_PATTERN } from '../constant'
 import { getDecimalForm } from '@/utils/neo/helpers'
 
 const Container = styled(Box)`
   max-width: 900px;
-  margin: 0 auto;
+  margin: 25px auto 0px;
   display: flex;
   flex-direction: column;
+  border-top: 1px solid #ccc;
 `
 
 const ContainerRowForPool = styled(Box)`
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   justify-items: center;
+  align-items: center;
+  text-align: center;
   margin-bottom: 10px;
   overflow-wrap: anywhere;
+  border-bottom: 1px solid #ccc;
 `
 
 const Div = styled('div')(({ theme }) => ({
@@ -107,6 +111,22 @@ export default function TradePoolPage() {
     setOpenModal(false)
   }
 
+  const isDisable = () => {
+    return (
+      !connectedWallet ||
+      !isValidOfferTokenHash ||
+      inputOfferTokenHash.length == 0 ||
+      !isValidPurchaseTokenHash ||
+      inputPurchaseTokenHash.length == 0 ||
+      !isValidOfferTokenAmount ||
+      inputOfferTokenAmount.length == 0 ||
+      !isValidOfferPackages ||
+      inputOfferPackages.length == 0 ||
+      !isValidPurchasePrice ||
+      inputPurchasePrice.length == 0
+    )
+  }
+
   const INPUT_OFFER_TOKEN_HASH_ID = 'input-offer-token-hash'
   const [isValidOfferTokenHash, setIsValidOfferTokenHash] = useState(true)
   const [inputOfferTokenHash, setInputOfferTokenHash] = useState('')
@@ -126,6 +146,14 @@ export default function TradePoolPage() {
   const INPUT_PURCHASE_PRICE_ID = 'input-purchase-price'
   const [isValidPurchasePrice, setIsValidPurchasePrice] = useState(true)
   const [inputPurchasePrice, setInputPurchasePrice] = useState('')
+
+  const INPUT_PURCHASE_PACKAGES_ID = 'input-purchase-packages'
+  const [isValidPurchasePackages, setIsValidPurchasePackages] = useState<
+    boolean[]
+  >([true])
+  const [inputPurchasePackages, setInputPurchasePackages] = useState<string[]>([
+    '',
+  ])
 
   const handleTokenHashChange = (event: ChangeEvent<HTMLInputElement>) => {
     const id = event.target.id
@@ -151,7 +179,12 @@ export default function TradePoolPage() {
   }
 
   const handleNumberChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const id = event.target.id
+    const id = event.target.id.startsWith(INPUT_PURCHASE_PACKAGES_ID)
+      ? INPUT_PURCHASE_PACKAGES_ID
+      : event.target.id
+    const index = event.target.id.startsWith(INPUT_PURCHASE_PACKAGES_ID)
+      ? Number(event.target.id.split(INPUT_PURCHASE_PACKAGES_ID)[1])
+      : 0
     const value = event.target.value
     switch (id) {
       case INPUT_OFFER_TOKEN_AMOUNT_ID:
@@ -178,6 +211,16 @@ export default function TradePoolPage() {
           setIsValidPurchasePrice(true)
         }
         break
+      case INPUT_PURCHASE_PACKAGES_ID:
+        const updatedInputPurchasePackages = [...inputPurchasePackages]
+        updatedInputPurchasePackages[index] = value
+        setInputPurchasePackages(updatedInputPurchasePackages)
+        const isValid = NUMBER_PATTERN.test(value)
+        const updatedIsValidPurchasePackages = [...isValidPurchasePackages]
+        updatedIsValidPurchasePackages[index] =
+          value.length > 0 ? isValid : true
+        setIsValidPurchasePackages(updatedIsValidPurchasePackages)
+        break
     }
   }
 
@@ -186,6 +229,9 @@ export default function TradePoolPage() {
     try {
       const result = await new VendorContract(network).ListTrade()
       setTradeList(result.tradeList)
+      // Initialize values for each row
+      setIsValidPurchasePackages(new Array(result.tradeList.length).fill(true))
+      setInputPurchasePackages(new Array(result.tradeList.length).fill(''))
     } catch (e: any) {
       if (e.type !== undefined) {
         showErrorPopup(`Error: ${e.type} ${e.description}`)
@@ -222,13 +268,20 @@ export default function TradePoolPage() {
     }
   }
 
-  const handleExecuteTrade = async (tradeId: number) => {
+  const handleExecuteTrade = async (
+    tradeId: number,
+    purchaseTokenHash: string,
+    purchasePackages: number
+  ) => {
     if (connectedWallet) {
       try {
-        // const txid = await new VendorContract(network).ExecuteTrade(
-        //   connectedWallet,
-        // )
-        // showSuccessPopup(txid)
+        const txid = await new VendorContract(network).ExecuteTrade(
+          connectedWallet,
+          tradeId,
+          purchaseTokenHash,
+          purchasePackages
+        )
+        showSuccessPopup(txid)
       } catch (e: any) {
         if (e.type !== undefined) {
           showErrorPopup(`Error: ${e.type} ${e.description}`)
@@ -267,6 +320,7 @@ export default function TradePoolPage() {
             <Div>Action</Div>
           </ContainerRowForPool>
           {tradeList.map((trade, index) => {
+            const inputPurchasePackagesId = INPUT_PURCHASE_PACKAGES_ID + index
             return (
               <ContainerRowForPool key={index}>
                 <Div>{trade.id}</Div>
@@ -277,12 +331,36 @@ export default function TradePoolPage() {
                 <Div>{trade.soldPackages}</Div>
                 <Div>{trade.purchaseTokenHash}</Div>
                 <Div>{getDecimalForm(trade.purchasePrice, 8)}</Div>
-                <Div>
+                <Div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Input
+                    id={inputPurchasePackagesId}
+                    placeholder="Qty."
+                    defaultValue=""
+                    style={{ width: '60px', marginBottom: '10px' }}
+                    value={inputPurchasePackages[index]}
+                    onChange={handleNumberChange}
+                    error={!isValidPurchasePackages[index]}
+                  />
                   <Button
-                    disabled={!connectedWallet}
+                    disabled={
+                      !connectedWallet ||
+                      !isValidPurchasePackages[index] ||
+                      inputPurchasePackages[index].length == 0 ||
+                      Number(inputPurchasePackages[index]) == 0
+                    }
                     variant="outlined"
                     onClick={() => {
-                      handleExecuteTrade(trade.id)
+                      handleExecuteTrade(
+                        trade.id,
+                        trade.purchaseTokenHash,
+                        Number(inputPurchasePackages[index])
+                      )
                     }}
                   >
                     Trade
@@ -376,7 +454,7 @@ export default function TradePoolPage() {
               />
             </div>
             <Button
-              disabled={!connectedWallet}
+              disabled={isDisable()}
               style={{ marginTop: '25px', marginLeft: '25px' }}
               variant="outlined"
               onClick={() => {
