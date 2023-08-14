@@ -61,5 +61,11 @@ namespace Vendor
       }
       return tradePaginationData;
     }
+
+    [Safe]
+    public static List<Map<string, object>> ListOfferTokenWhiteList()
+    {
+      return OfferTokenWhiteListStorage.List();
+    }
   }
 }

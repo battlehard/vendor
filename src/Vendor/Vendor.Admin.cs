@@ -1,4 +1,5 @@
-﻿using Neo.SmartContract.Framework.Services;
+﻿using Neo;
+using Neo.SmartContract.Framework.Services;
 using System.Numerics;
 using static Vendor.Helpers;
 
@@ -25,6 +26,23 @@ namespace Vendor
     {
       CheckAdminAuthorization();
       InternalCancelTrade(tradeId);
+    }
+
+    public static void AddOfferTokenWhiteList(UInt160 contractHash, string symbol, string imageUrl)
+    {
+      CheckAdminAuthorization();
+      TokenContractInfo offerTokenInfo = new()
+      {
+        symbol = symbol,
+        imageUrl = imageUrl
+      };
+      OfferTokenWhiteListStorage.Put(contractHash, offerTokenInfo);
+    }
+
+    public static void RemoveOfferTokenWhiteList(UInt160 contractHash)
+    {
+      CheckAdminAuthorization();
+      OfferTokenWhiteListStorage.Delete(contractHash);
     }
   }
 }

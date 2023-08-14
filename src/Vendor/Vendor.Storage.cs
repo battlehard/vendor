@@ -16,6 +16,7 @@ namespace Vendor
     private static readonly byte[] Prefix_Trade_Count = new byte[] { 0x01, 0x03 };
     private static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x04 };
     private static readonly byte[] Prefix_Create_Trade_Fee = new byte[] { 0x01, 0x05 };
+    private static readonly byte[] Prefix_Offer_Token_White_List = new byte[] { 0x01, 0x06 };
 
     /// <summary>
     /// Class <c>AdminWhiteListStorage</c>
@@ -39,6 +40,52 @@ namespace Vendor
       {
         StorageMap adminWhiteListMap = new(Storage.CurrentContext, Prefix_Admin_White_List);
         adminWhiteListMap.Delete(contractHash);
+      }
+    }
+
+    /// <summary>
+    /// Class <c>OfferTokenWhiteListStorage</c>
+    /// Storage of hash of token that can put offer.
+    /// </summary>
+    public static class OfferTokenWhiteListStorage
+    {
+      internal static void Put(UInt160 contractHash, TokenContractInfo contractInfo)
+      {
+        StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
+        offerTokenWhiteListMap.Put(contractHash, StdLib.Serialize(contractInfo));
+      }
+
+      internal static TokenContractInfo Get(UInt160 contractHash)
+      {
+        StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
+        var offerTokenContractInfo = offerTokenWhiteListMap.Get(contractHash);
+        string contractAddress = contractHash.ToAddress();
+        Assert(offerTokenContractInfo != null, $"Provide token contract hash is not allowed: {contractAddress}");
+        return (TokenContractInfo)StdLib.Deserialize(offerTokenContractInfo);
+      }
+
+      public static void Delete(UInt160 contractHash)
+      {
+        StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
+        offerTokenWhiteListMap.Delete(contractHash);
+      }
+
+      internal static List<Map<string, object>> List()
+      {
+        StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
+        Iterator keys = offerTokenWhiteListMap.Find(FindOptions.KeysOnly | FindOptions.RemovePrefix);
+        List<Map<string, object>> returnListData = new();
+        while (keys.Next())
+        {
+          UInt160 tokenHash = (UInt160)keys.Value;
+          TokenContractInfo tokenInfo = Get(tokenHash);
+          Map<string, object> tokenMapData = new();
+          tokenMapData["offerTokenHash"] = tokenHash;
+          tokenMapData["symbol"] = tokenInfo.symbol;
+          tokenMapData["imageUrl"] = tokenInfo.imageUrl;
+          returnListData.Add(tokenMapData);
+        }
+        return returnListData;
       }
     }
 

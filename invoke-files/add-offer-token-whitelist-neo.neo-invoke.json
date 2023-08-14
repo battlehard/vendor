@@ -1,0 +1,11 @@
+[
+  {
+    "contract": "Vendor",
+    "operation": "addOfferTokenWhiteList",
+    "args": [
+      "#GasToken",
+      "GAS",
+      "https://neo-web.azureedge.net/images/presskit/img4.png"
+    ]
+  }
+]

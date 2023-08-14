@@ -7,6 +7,12 @@ namespace Vendor
 {
   public partial class Vendor
   {
+    private static void CheckOfferTokenWhiteList(UInt160 offerTokenHash)
+    {
+      // Error will be thrown when provided offerTokenHash is not whitelisted.
+      OfferTokenWhiteListStorage.Get(offerTokenHash);
+    }
+
     private static void InternalCancelTrade(BigInteger tradeId)
     {
       Trade activeTrade = TradePoolStorage.Get(tradeId);
