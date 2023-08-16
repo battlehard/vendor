@@ -166,9 +166,9 @@ namespace Vendor
       { Runtime.Notify("Expected error", new object[] { e }); }
 
       Assert(tradeNum == TradePoolStorage.Count(), $"Expected {tradeNum} trades");
-      Runtime.Notify("ListTrade(4, 4)", new object[] { ListTrade(4, 4) });
-      Runtime.Notify("ListTrade(5, 4)", new object[] { ListTrade(5, 4) });
-      Runtime.Notify("ListTrade(7, 3)", new object[] { ListTrade(7, 3) });
+      ListTrade(4, 4);
+      ListTrade(5, 4);
+      ListTrade(7, 3);
     }
 
     public static void Debug_ListOfferTokenWhiteList()

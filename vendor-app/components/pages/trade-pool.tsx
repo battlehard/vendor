@@ -16,6 +16,7 @@ import { useWallet } from '@/context/wallet-provider'
 import Notification from '../notification'
 import { HASH160_PATTERN, NUMBER_PATTERN } from '../constant'
 import { getDecimalForm } from '@/utils/neo/helpers'
+import { AddressShorten } from '@/utils/app-helpers'
 
 const Container = styled(Box)`
   max-width: 900px;
@@ -58,6 +59,11 @@ const InputTextField = styled(TextField)`
   width: 600px;
   margin-top: 25px;
   margin-left: 25px;
+`
+
+const Image = styled('img')`
+  width: 32px;
+  height: 32px;
 `
 
 interface MessagePanelProps {
@@ -325,7 +331,17 @@ export default function TradePoolPage() {
               <ContainerRowForPool key={index}>
                 <Div>{trade.id}</Div>
                 <Div>{trade.owner}</Div>
-                <Div>{trade.offerTokenHash}</Div>
+                <Div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div>{AddressShorten(trade.offerTokenHash)}</div>
+                  <Image src={trade.offerTokenImageUrl} />
+                  <div>{trade.offerTokenSymbol}</div>
+                </Div>
                 <Div>{getDecimalForm(trade.amountPerPackage, 8)}</Div>
                 <Div>{trade.offerPackages}</Div>
                 <Div>{trade.soldPackages}</Div>

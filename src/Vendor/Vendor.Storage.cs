@@ -64,6 +64,21 @@ namespace Vendor
         return (TokenContractInfo)StdLib.Deserialize(offerTokenContractInfo);
       }
 
+      internal static string[] GetSymbolAndImageUrl(UInt160 contractHash)
+      {
+        StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
+        var offerTokenContractInfo = offerTokenWhiteListMap.Get(contractHash);
+        if (offerTokenContractInfo != null)
+        {
+          TokenContractInfo tokenInfo = (TokenContractInfo)StdLib.Deserialize(offerTokenContractInfo);
+          return new string[] { tokenInfo.symbol, tokenInfo.imageUrl };
+        }
+        else
+        {
+          return new string[] { "", "" };
+        }
+      }
+
       public static void Delete(UInt160 contractHash)
       {
         StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
@@ -135,24 +150,39 @@ namespace Vendor
         return (BigInteger)Storage.Get(Storage.CurrentContext, Prefix_Trade_Count);
       }
 
-      internal static Map<BigInteger, Trade> Map(BigInteger skipCount, BigInteger pageSize)
+      internal static List<Map<string, object>> List(BigInteger skipCount, BigInteger pageSize)
       {
         StorageMap tradesMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
         Iterator keys = tradesMap.Find(FindOptions.KeysOnly | FindOptions.RemovePrefix);
-        Map<BigInteger, Trade> selectedTrade = new();
+        List<Map<string, object>> returnListData = new();
         BigInteger foundKeySeq = 0;
         while (keys.Next())
         {
           if (foundKeySeq >= skipCount && foundKeySeq < (skipCount + pageSize))
           {
             BigInteger tradeId = (BigInteger)keys.Value;
-            selectedTrade[tradeId] = Get(tradeId);
+            Trade trade = Get(tradeId);
+            string[] symbolAndImageUrl = OfferTokenWhiteListStorage.GetSymbolAndImageUrl(trade.offerTokenHash);
+
+            Map<string, object> tradeMapData = new();
+            tradeMapData["id"] = ByteStringToUlong((ByteString)tradeId);
+            tradeMapData["owner"] = trade.owner;
+            tradeMapData["offerTokenHash"] = trade.offerTokenHash;
+            tradeMapData["offerTokenSymbol"] = (ByteString)symbolAndImageUrl[0];
+            tradeMapData["offerTokenImageUrl"] = (ByteString)symbolAndImageUrl[1];
+            tradeMapData["offerTokenAmount"] = trade.offerTokenAmount;
+            tradeMapData["offerPackages"] = trade.offerPackages;
+            tradeMapData["amountPerPackage"] = trade.amountPerPackage;
+            tradeMapData["purchaseTokenHash"] = trade.purchaseTokenHash;
+            tradeMapData["purchasePrice"] = trade.purchasePrice;
+            tradeMapData["soldPackages"] = trade.soldPackages;
+            returnListData.Add(tradeMapData);
           }
-          if (selectedTrade.Count >= pageSize)
+          if (returnListData.Count >= pageSize)
             break;
           foundKeySeq++;
         }
-        return selectedTrade;
+        return returnListData;
       }
     }
 

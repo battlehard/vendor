@@ -32,33 +32,13 @@ namespace Vendor
 
       // Calculate the number of items to skip based on the requested page and page size
       BigInteger skipCount = (pageNumber - 1) * pageSize;
-      // Get list of active trades with pagination parameters
-      Map<BigInteger, Trade> tradeMap = TradePoolStorage.Map(skipCount, pageSize);
 
       // Initialize return variable
       Map<string, object> tradePaginationData = new();
       tradePaginationData["totalPages"] = totalPages;
       tradePaginationData["totalTrades"] = totalTrades;
-      tradePaginationData["tradeList"] = new List<Map<string, object>>();
-      // Iterate through list of active trades and create trade object in map type.
-      BigInteger[] tradeIdsList = tradeMap.Keys;
-      for (int i = 0; i < tradeIdsList.Length; i++)
-      {
-        BigInteger tradeId = tradeIdsList[i];
-        Trade trade = tradeMap[tradeId];
-        Map<string, object> tradeObject = new();
-        // tradeId automatically convert to ByteString even without casting, so need to explicitly convert to ulong
-        tradeObject["id"] = ByteStringToUlong((ByteString)tradeId);
-        tradeObject["owner"] = trade.owner;
-        tradeObject["offerTokenHash"] = trade.offerTokenHash;
-        tradeObject["offerTokenAmount"] = trade.offerTokenAmount;
-        tradeObject["offerPackages"] = trade.offerPackages;
-        tradeObject["amountPerPackage"] = trade.amountPerPackage;
-        tradeObject["purchaseTokenHash"] = trade.purchaseTokenHash;
-        tradeObject["purchasePrice"] = trade.purchasePrice;
-        tradeObject["soldPackages"] = trade.soldPackages;
-        ((List<Map<string, object>>)tradePaginationData["tradeList"]).Add(tradeObject);
-      }
+      // Get list of active trades with pagination parameters
+      tradePaginationData["tradeList"] = TradePoolStorage.List(skipCount, pageSize);
       return tradePaginationData;
     }
 

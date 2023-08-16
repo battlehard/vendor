@@ -31,6 +31,7 @@ namespace Vendor
     public static void AddOfferTokenWhiteList(UInt160 contractHash, string symbol, string imageUrl)
     {
       CheckAdminAuthorization();
+      ValidateSymbol(symbol);
       TokenContractInfo offerTokenInfo = new()
       {
         symbol = symbol,

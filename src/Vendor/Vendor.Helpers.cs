@@ -1,6 +1,7 @@
 ﻿using Neo;
 using Neo.SmartContract.Framework.Services;
 using System.Numerics;
+using static Vendor.Helpers;
 using static Vendor.Transfer;
 
 namespace Vendor
@@ -28,6 +29,11 @@ namespace Vendor
       // Remove trade
       TradePoolStorage.Delete(tradeId);
       OnTradeCancelled(tradeId, activeTrade.owner, activeTrade.offerTokenHash, returnOfferAmount, activeTrade.purchaseTokenHash, returnPurchasedAmount);
+    }
+
+    private static void ValidateSymbol(string symbol)
+    {
+      Assert(symbol.Length >= 1 && symbol.Length <= 10, $"{CONTRACT_NAME}: Symbol length must be in range of 1 to 10 characters");
     }
   }
 }
