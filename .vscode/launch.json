@@ -19,6 +19,20 @@
       "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
     },
     {
+      "name": "Debug_OfferTokenWhiteListStorage",
+      "type": "neo-contract",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Vendor/bin/sc/Vendor.nef",
+      "neo-express": "${workspaceFolder}/default.neo-express",
+      "invocation": {
+        "operation": "debug_OfferTokenWhiteListStorage",
+        "args": []
+      },
+      "storage": [],
+      "signers": ["@owner"],
+      "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
+    },
+    {
       "name": "Debug_CreateTrade",
       "type": "neo-contract",
       "request": "launch",
@@ -108,6 +122,20 @@
           ]
         }
       ],
+      "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
+    },
+    {
+      "name": "Debug_ListOfferTokenWhiteList",
+      "type": "neo-contract",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Vendor/bin/sc/Vendor.nef",
+      "neo-express": "${workspaceFolder}/default.neo-express",
+      "invocation": {
+        "operation": "debug_ListOfferTokenWhiteList",
+        "args": []
+      },
+      "storage": [],
+      "signers": ["@owner"],
       "checkpoint": "${workspaceFolder}/checkpoints/vendor-deployed.neoxp-checkpoint"
     }
   ]

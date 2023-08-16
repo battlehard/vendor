@@ -16,6 +16,7 @@ namespace Vendor
     private static readonly byte[] Prefix_Trade_Count = new byte[] { 0x01, 0x03 };
     private static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x04 };
     private static readonly byte[] Prefix_Create_Trade_Fee = new byte[] { 0x01, 0x05 };
+    private static readonly byte[] Prefix_Offer_Token_White_List = new byte[] { 0x01, 0x06 };
 
     /// <summary>
     /// Class <c>AdminWhiteListStorage</c>
@@ -39,6 +40,67 @@ namespace Vendor
       {
         StorageMap adminWhiteListMap = new(Storage.CurrentContext, Prefix_Admin_White_List);
         adminWhiteListMap.Delete(contractHash);
+      }
+    }
+
+    /// <summary>
+    /// Class <c>OfferTokenWhiteListStorage</c>
+    /// Storage of hash of token that can put offer.
+    /// </summary>
+    public static class OfferTokenWhiteListStorage
+    {
+      internal static void Put(UInt160 contractHash, TokenContractInfo contractInfo)
+      {
+        StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
+        offerTokenWhiteListMap.Put(contractHash, StdLib.Serialize(contractInfo));
+      }
+
+      internal static TokenContractInfo Get(UInt160 contractHash)
+      {
+        StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
+        var offerTokenContractInfo = offerTokenWhiteListMap.Get(contractHash);
+        string contractAddress = contractHash.ToAddress();
+        Assert(offerTokenContractInfo != null, $"Provide token contract hash is not allowed: {contractAddress}");
+        return (TokenContractInfo)StdLib.Deserialize(offerTokenContractInfo);
+      }
+
+      internal static string[] GetSymbolAndImageUrl(UInt160 contractHash)
+      {
+        StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
+        var offerTokenContractInfo = offerTokenWhiteListMap.Get(contractHash);
+        if (offerTokenContractInfo != null)
+        {
+          TokenContractInfo tokenInfo = (TokenContractInfo)StdLib.Deserialize(offerTokenContractInfo);
+          return new string[] { tokenInfo.symbol, tokenInfo.imageUrl };
+        }
+        else
+        {
+          return new string[] { "", "" };
+        }
+      }
+
+      public static void Delete(UInt160 contractHash)
+      {
+        StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
+        offerTokenWhiteListMap.Delete(contractHash);
+      }
+
+      internal static List<Map<string, object>> List()
+      {
+        StorageMap offerTokenWhiteListMap = new(Storage.CurrentContext, Prefix_Offer_Token_White_List);
+        Iterator keys = offerTokenWhiteListMap.Find(FindOptions.KeysOnly | FindOptions.RemovePrefix);
+        List<Map<string, object>> returnListData = new();
+        while (keys.Next())
+        {
+          UInt160 tokenHash = (UInt160)keys.Value;
+          TokenContractInfo tokenInfo = Get(tokenHash);
+          Map<string, object> tokenMapData = new();
+          tokenMapData["offerTokenHash"] = tokenHash;
+          tokenMapData["symbol"] = tokenInfo.symbol;
+          tokenMapData["imageUrl"] = tokenInfo.imageUrl;
+          returnListData.Add(tokenMapData);
+        }
+        return returnListData;
       }
     }
 
@@ -88,24 +150,39 @@ namespace Vendor
         return (BigInteger)Storage.Get(Storage.CurrentContext, Prefix_Trade_Count);
       }
 
-      internal static Map<BigInteger, Trade> Map(BigInteger skipCount, BigInteger pageSize)
+      internal static List<Map<string, object>> List(BigInteger skipCount, BigInteger pageSize)
       {
         StorageMap tradesMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
         Iterator keys = tradesMap.Find(FindOptions.KeysOnly | FindOptions.RemovePrefix);
-        Map<BigInteger, Trade> selectedTrade = new();
+        List<Map<string, object>> returnListData = new();
         BigInteger foundKeySeq = 0;
         while (keys.Next())
         {
           if (foundKeySeq >= skipCount && foundKeySeq < (skipCount + pageSize))
           {
             BigInteger tradeId = (BigInteger)keys.Value;
-            selectedTrade[tradeId] = Get(tradeId);
+            Trade trade = Get(tradeId);
+            string[] symbolAndImageUrl = OfferTokenWhiteListStorage.GetSymbolAndImageUrl(trade.offerTokenHash);
+
+            Map<string, object> tradeMapData = new();
+            tradeMapData["id"] = ByteStringToUlong((ByteString)tradeId);
+            tradeMapData["owner"] = trade.owner;
+            tradeMapData["offerTokenHash"] = trade.offerTokenHash;
+            tradeMapData["offerTokenSymbol"] = (ByteString)symbolAndImageUrl[0];
+            tradeMapData["offerTokenImageUrl"] = (ByteString)symbolAndImageUrl[1];
+            tradeMapData["offerTokenAmount"] = trade.offerTokenAmount;
+            tradeMapData["offerPackages"] = trade.offerPackages;
+            tradeMapData["amountPerPackage"] = trade.amountPerPackage;
+            tradeMapData["purchaseTokenHash"] = trade.purchaseTokenHash;
+            tradeMapData["purchasePrice"] = trade.purchasePrice;
+            tradeMapData["soldPackages"] = trade.soldPackages;
+            returnListData.Add(tradeMapData);
           }
-          if (selectedTrade.Count >= pageSize)
+          if (returnListData.Count >= pageSize)
             break;
           foundKeySeq++;
         }
-        return selectedTrade;
+        return returnListData;
       }
     }
 

@@ -18,6 +18,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 
 import { NEO_LINE, ONEGATE } from '@/utils/neo/constant'
 import { useWallet } from '@/context/wallet-provider'
+import { AddressShorten } from '@/utils/app-helpers'
 
 const MainNavBar = () => {
   const {
@@ -52,8 +53,7 @@ const MainNavBar = () => {
             endIcon={<DeleteIcon />}
             color="secondary"
           >
-            {(connectedWallet?.account.address as string).substring(0, 6)}...
-            {(connectedWallet?.account.address as string).slice(-6)}
+            {AddressShorten(connectedWallet?.account.address)}
           </Button>
         )}
         {!connectedWallet && (

@@ -14,4 +14,10 @@ namespace Vendor
     public BigInteger purchasePrice;
     public BigInteger soldPackages;
   }
+
+  public struct TokenContractInfo
+  {
+    public string symbol;
+    public string imageUrl;
+  }
 }

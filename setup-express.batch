@@ -7,4 +7,6 @@ transfer 10000 neo genesis user
 
 contract deploy ./src/Vendor/bin/sc/Vendor.nef owner
 contract invoke ./invoke-files/add-admin-whitelist.neo-invoke.json owner
+contract invoke ./invoke-files/add-offer-token-whitelist-gas.neo-invoke.json owner
+contract invoke ./invoke-files/add-offer-token-whitelist-neo.neo-invoke.json owner
 checkpoint create ./checkpoints/vendor-deployed -f

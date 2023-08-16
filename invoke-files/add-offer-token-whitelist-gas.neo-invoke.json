@@ -1,0 +1,11 @@
+[
+  {
+    "contract": "Vendor",
+    "operation": "addOfferTokenWhiteList",
+    "args": [
+      "#NeoToken",
+      "NEO",
+      "https://neo-web.azureedge.net/images/presskit/img3.png"
+    ]
+  }
+]

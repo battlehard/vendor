@@ -26,6 +26,7 @@ namespace Vendor
     /// <param name="purchasePrice">Price per package with BigInteger format</param>
     public static void CreateTrade(UInt160 offerTokenHash, BigInteger offerTokenAmount, BigInteger offerPackages, UInt160 purchaseTokenHash, BigInteger purchasePrice)
     {
+      CheckOfferTokenWhiteList(offerTokenHash);
       // Initialize variables
       var tx = (Transaction)Runtime.ScriptContainer;
       UInt160 sender = tx.Sender;

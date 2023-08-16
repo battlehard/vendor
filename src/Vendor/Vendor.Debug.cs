@@ -53,6 +53,39 @@ namespace Vendor
       }
     }
 
+    public static void Debug_OfferTokenWhiteListStorage()
+    {
+      IsOwner();
+      UInt160 executingScriptHash = Runtime.ExecutingScriptHash;
+      try
+      {
+        CheckOfferTokenWhiteList(executingScriptHash);
+      }
+      catch (Exception e)
+      {
+        Runtime.Notify("Expected error", new object[] { e });
+      }
+      TokenContractInfo offerTokenInfo = new()
+      {
+        symbol = "TEST",
+        imageUrl = "https://example.com/testImg.jpg"
+      };
+      OfferTokenWhiteListStorage.Put(executingScriptHash, offerTokenInfo);
+      TokenContractInfo queriedToken = OfferTokenWhiteListStorage.Get(executingScriptHash);
+      string offerTokenAddress = executingScriptHash.ToAddress();
+      Runtime.Notify($"OfferTokenInfo", new object[] { offerTokenAddress, queriedToken });
+      CheckOfferTokenWhiteList(executingScriptHash);
+      OfferTokenWhiteListStorage.Delete(executingScriptHash);
+      try
+      {
+        CheckOfferTokenWhiteList(executingScriptHash);
+      }
+      catch (Exception e)
+      {
+        Runtime.Notify("Expected error", new object[] { e });
+      }
+    }
+
     public static void Debug_CreateTrade()
     {
       IsOwner();
@@ -133,10 +166,16 @@ namespace Vendor
       { Runtime.Notify("Expected error", new object[] { e }); }
 
       Assert(tradeNum == TradePoolStorage.Count(), $"Expected {tradeNum} trades");
-      Runtime.Notify("ListTrade(4, 4)", new object[] { ListTrade(4, 4) });
-      Runtime.Notify("ListTrade(5, 4)", new object[] { ListTrade(5, 4) });
-      Runtime.Notify("ListTrade(7, 3)", new object[] { ListTrade(7, 3) });
+      ListTrade(4, 4);
+      ListTrade(5, 4);
+      ListTrade(7, 3);
     }
+
+    public static void Debug_ListOfferTokenWhiteList()
+    {
+      Runtime.Notify("ListOfferTokenWhiteList", new object[] { ListOfferTokenWhiteList() });
+    }
+
     private static void LogTradeData(BigInteger tradeId)
     {
       Trade queriedTrade = TradePoolStorage.Get(tradeId);

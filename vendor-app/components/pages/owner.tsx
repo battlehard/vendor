@@ -3,13 +3,10 @@
 import { AlertColor, Button, TextField } from '@mui/material'
 import TabPanel, { ITabPage } from '../tab-panel'
 import { useWallet } from '@/context/wallet-provider'
-import {
-  AdminWhiteListAction,
-  VendorContract,
-} from '@/utils/neo/contracts/vendor'
+import { WhiteListAction, VendorContract } from '@/utils/neo/contracts/vendor'
 import React, { ChangeEvent, useState } from 'react'
 import Notification from '../notification'
-import { NUMBER_PATTERN } from '../constant'
+import { HASH160_PATTERN } from '../constant'
 
 export default function OwnerPage() {
   // Notification
@@ -30,15 +27,15 @@ export default function OwnerPage() {
   const pages: ITabPage[] = [
     {
       label: 'Add admin white list',
-      component: AdminWhiteList(AdminWhiteListAction.ADD),
+      component: AdminWhiteList(WhiteListAction.ADD),
     },
     {
       label: 'Remove admin white list',
-      component: AdminWhiteList(AdminWhiteListAction.REMOVE),
+      component: AdminWhiteList(WhiteListAction.REMOVE),
     },
   ]
 
-  function AdminWhiteList(adminWhiteListAction: AdminWhiteListAction) {
+  function AdminWhiteList(adminWhiteListAction: WhiteListAction) {
     const { connectedWallet, network } = useWallet()
     const [inputWalletHash, setInputWalletHash] = useState('')
     const [isValidHash, setIsValidHash] = useState(true)
@@ -50,7 +47,7 @@ export default function OwnerPage() {
       const value = event.target.value
       setInputWalletHash(value)
       if (value.length > 0) {
-        setIsValidHash(NUMBER_PATTERN.test(value))
+        setIsValidHash(HASH160_PATTERN.test(value))
       } else {
         setIsValidHash(true)
       }

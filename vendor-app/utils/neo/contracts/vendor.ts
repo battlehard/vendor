@@ -11,7 +11,7 @@ import { Network } from '../network'
 import { wallet as NeonWallet, tx } from '@cityofzion/neon-core'
 import { MAX_PAGE_LIMIT } from '@/components/constant'
 
-export enum AdminWhiteListAction {
+export enum WhiteListAction {
   ADD = 'Add',
   REMOVE = 'Remove',
 }
@@ -25,6 +25,8 @@ export interface ITradeProperties {
   id: number
   owner: string
   offerTokenHash: string
+  offerTokenSymbol: string
+  offerTokenImageUrl: string
   offerTokenAmount: number
   offerPackages: number
   amountPerPackage: number
@@ -51,7 +53,7 @@ export class VendorContract {
   ModifyAdminWhiteList = async (
     connectedWallet: IConnectedWallet,
     adminWalletHash: string,
-    action: AdminWhiteListAction
+    action: WhiteListAction
   ): Promise<string> => {
     const invokeScript: IInvokeScriptJson = {
       operation: `${action.toLowerCase()}AdminWhiteList`,
@@ -62,6 +64,45 @@ export class VendorContract {
           value: adminWalletHash,
         },
       ],
+    }
+
+    return new WalletAPI(connectedWallet.key).invoke(
+      connectedWallet.account.address,
+      invokeScript
+    )
+  }
+
+  ModifyOfferTokenWhiteList = async (
+    connectedWallet: IConnectedWallet,
+    tokenContractHash: string,
+    symbol: string,
+    imageUrl: string,
+    action: WhiteListAction
+  ): Promise<string> => {
+    const invokeScript: IInvokeScriptJson = {
+      operation: `${action.toLowerCase()}OfferTokenWhiteList`,
+      scriptHash: this.contractHash,
+      args: [
+        {
+          type: 'Hash160',
+          value: tokenContractHash,
+        },
+      ],
+    }
+
+    if (action == WhiteListAction.ADD) {
+      invokeScript.args?.push(
+        ...[
+          {
+            type: 'String',
+            value: symbol,
+          },
+          {
+            type: 'String',
+            value: imageUrl,
+          },
+        ]
+      )
     }
 
     return new WalletAPI(connectedWallet.key).invoke(
