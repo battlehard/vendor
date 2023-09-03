@@ -12,7 +12,7 @@ namespace Vendor
 {
   [ManifestExtra("Author", "BATTLE HARD")]
   [ManifestExtra("Email", "admin@battlehard.studio")]
-  [ManifestExtra("Description", "Trade House")]
+  [ManifestExtra("Description", "Open Vending Machine")]
   [ContractPermission("*", "*")]
   public partial class Vendor : SmartContract
   {
