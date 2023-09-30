@@ -121,12 +121,17 @@ namespace Vendor
 
     public static class TradePoolStorage
     {
+      internal static void Create(BigInteger tradeId, Trade trade)
+      {
+        Put(tradeId, trade);
+        // Increase count
+        Storage.Put(Storage.CurrentContext, Prefix_Trade_Count, Count() + 1);
+      }
+
       internal static void Put(BigInteger tradeId, Trade trade)
       {
         StorageMap tradesMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
         tradesMap.Put(tradeId.ToByteArray(), StdLib.Serialize(trade));
-        // Increase count
-        Storage.Put(Storage.CurrentContext, Prefix_Trade_Count, (BigInteger)Storage.Get(Storage.CurrentContext, Prefix_Trade_Count) + 1);
       }
 
       internal static void Delete(BigInteger tradeId)
@@ -134,7 +139,7 @@ namespace Vendor
         StorageMap tradesMap = new(Storage.CurrentContext, Prefix_Trade_Pool);
         tradesMap.Delete(tradeId.ToByteArray());
         // Decrease count
-        Storage.Put(Storage.CurrentContext, Prefix_Trade_Count, (BigInteger)Storage.Get(Storage.CurrentContext, Prefix_Trade_Count) - 1);
+        Storage.Put(Storage.CurrentContext, Prefix_Trade_Count, Count() - 1);
       }
 
       internal static Trade Get(BigInteger tradeId)

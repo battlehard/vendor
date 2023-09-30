@@ -1,3 +1,4 @@
+using System.Numerics;
 using Neo;
 using Neo.SmartContract.Framework;
 using Neo.SmartContract.Framework.Native;
@@ -44,6 +45,12 @@ namespace Vendor
     {
       CheckOwner();
       AdminWhiteListStorage.Delete(contractHash);
+    }
+
+    public static void ResetTradePoolCountTo(BigInteger count)
+    {
+      CheckOwner();
+      Storage.Put(Storage.CurrentContext, Prefix_Trade_Count, count);
     }
   }
 }

@@ -52,7 +52,7 @@ namespace Vendor
         purchasePrice = purchasePrice,
         soldPackages = 0
       };
-      TradePoolStorage.Put(tradeId, creatingTrade);
+      TradePoolStorage.Create(tradeId, creatingTrade);
       OnTradeCreated(tradeId, creatingTrade.owner, creatingTrade.offerTokenHash, creatingTrade.offerTokenAmount,
                       creatingTrade.offerPackages, creatingTrade.amountPerPackage, creatingTrade.purchaseTokenHash,
                       creatingTrade.purchasePrice);
