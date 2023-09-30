@@ -143,6 +143,9 @@ namespace test
       };
       // Compare stored value against expected value
       storedSoldPackages.ToString().Should().Be(ContractParameterParser.ConvertObject(expectedTrade.soldPackages).ToString());
+      // After execute trade, the trade count should remain the same, which is 1
+      storages.TryGetValue(Common.Prefix_Trade_Count, out var tradeCount).Should().BeTrue();
+      tradeCount!.Should().Be(1);
     }
 
     [Fact]

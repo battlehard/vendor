@@ -40,9 +40,12 @@ namespace Vendor
       {
         Runtime.Notify("Expected error", new object[] { e });
       }
-      TradePoolStorage.Put(TRADE_ID, mockTrade);
+      Assert(TradePoolStorage.Count() == 0, "Error, must be 0 before a trade created");
+      TradePoolStorage.Create(TRADE_ID, mockTrade);
       LogTradeData(TRADE_ID);
+      Assert(TradePoolStorage.Count() == 1, "Error, must be 1 after create a new trade");
       TradePoolStorage.Delete(TRADE_ID);
+      Assert(TradePoolStorage.Count() == 0, "Error, must be 0 after delete a trade");
       try
       {
         Trade notFoundTrade = TradePoolStorage.Get(TRADE_ID);
@@ -96,6 +99,7 @@ namespace Vendor
     {
       IsOwner();
       CreateTrade(OFFER_TOKEN_HASH, OFFER_TOKEN_AMOUNT, OFFER_PACKAGES, PURCHASE_TOKEN_HASH, PURCHASE_PRICE);
+      Assert(TradePoolStorage.Count() == 1, "Error, must be 1 after create a trade");
       try
       {
         ExecuteTrade(TRADE_ID, OVER_PURCHASE_PACKAGES);
@@ -106,8 +110,10 @@ namespace Vendor
       }
       ExecuteTrade(TRADE_ID, HALF_PURCHASE_PACKAGES);
       LogTradeData(TRADE_ID);
+      Assert(TradePoolStorage.Count() == 1, "Error, expect 1 after trade");
       ExecuteTrade(TRADE_ID, HALF_PURCHASE_PACKAGES);
       LogTradeData(TRADE_ID);
+      Assert(TradePoolStorage.Count() == 1, "Error, expect 1 after trade");
       try
       {
         ExecuteTrade(TRADE_ID, HALF_PURCHASE_PACKAGES);
