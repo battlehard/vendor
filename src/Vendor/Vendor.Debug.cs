@@ -98,6 +98,7 @@ namespace Vendor
     public static void Debug_ExecuteTrade()
     {
       IsOwner();
+      EnableDebugStorage();
       CreateTrade(OFFER_TOKEN_HASH, OFFER_TOKEN_AMOUNT, OFFER_PACKAGES, PURCHASE_TOKEN_HASH, PURCHASE_PRICE);
       Assert(TradePoolStorage.Count() == 1, "Error, must be 1 after create a trade");
       try
@@ -127,6 +128,7 @@ namespace Vendor
     public static void Debug_CancelTrade()
     {
       IsOwner();
+      EnableDebugStorage();
       BigInteger initialBalance = GetBalance(NEO.Hash, GetContractOwner());
 
       BigInteger tradeId = TRADE_ID;
@@ -157,6 +159,7 @@ namespace Vendor
     public static void Debug_ListTrade()
     {
       IsOwner();
+      EnableDebugStorage();
       int tradeNum = 20;
       for (int i = 0; i < tradeNum; i++)
         CreateTrade(OFFER_TOKEN_HASH, OFFER_TOKEN_AMOUNT, OFFER_PACKAGES, PURCHASE_TOKEN_HASH, PURCHASE_PRICE);
@@ -192,5 +195,11 @@ namespace Vendor
     {
       return (BigInteger)Contract.Call(tokenHash, "balanceOf", CallFlags.All, new object[] { walletHash });
     }
+
+    private static void EnableDebugStorage()
+    {
+      Storage.Put(Storage.CurrentContext, Prefix_Debug, 1);
+    }
+
   }
 }

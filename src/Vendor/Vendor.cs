@@ -26,6 +26,7 @@ namespace Vendor
     /// <param name="purchasePrice">Price per package with BigInteger format</param>
     public static void CreateTrade(UInt160 offerTokenHash, BigInteger offerTokenAmount, BigInteger offerPackages, UInt160 purchaseTokenHash, BigInteger purchasePrice)
     {
+      CheckReEntrancy();
       CheckOfferTokenWhiteList(offerTokenHash);
       // Initialize variables
       var tx = (Transaction)Runtime.ScriptContainer;
@@ -36,10 +37,6 @@ namespace Vendor
       BigInteger amountPerPackage = offerTokenAmount / offerPackages;
       // Generate tradeId using running number.
       BigInteger tradeId = TradeHeightStorage.IncreaseByOne();
-      // Collect GAS fee from user
-      Safe17Transfer(GAS.Hash, sender, vendor, CreateTradeFeeStorage.Get());
-      // Lock offer token from user into vendor contract
-      Safe17Transfer(offerTokenHash, sender, vendor, offerTokenAmount);
       // Create a trade object
       Trade creatingTrade = new()
       {
@@ -56,6 +53,11 @@ namespace Vendor
       OnTradeCreated(tradeId, creatingTrade.owner, creatingTrade.offerTokenHash, creatingTrade.offerTokenAmount,
                       creatingTrade.offerPackages, creatingTrade.amountPerPackage, creatingTrade.purchaseTokenHash,
                       creatingTrade.purchasePrice);
+      // Call external after state modification
+      // Collect GAS fee from user
+      Safe17Transfer(GAS.Hash, sender, vendor, CreateTradeFeeStorage.Get());
+      // Lock offer token from user into vendor contract
+      Safe17Transfer(offerTokenHash, sender, vendor, offerTokenAmount);
     }
 
     /// <summary>
@@ -65,6 +67,7 @@ namespace Vendor
     /// <param name="purchasePackages">Number of packages to purchase</param>
     public static void ExecuteTrade(BigInteger tradeId, BigInteger purchasePackages)
     {
+      CheckReEntrancy();
       Assert(purchasePackages > 0, "Purchase packages must be at least 1");
       // Get active trade, in case of no trade available, error message will be thrown.
       Trade activeTrade = TradePoolStorage.Get(tradeId);
@@ -77,15 +80,16 @@ namespace Vendor
       UInt160 vendor = Runtime.ExecutingScriptHash;
       BigInteger purchaseAmount = activeTrade.purchasePrice * purchasePackages;
       BigInteger sellAmount = activeTrade.amountPerPackage * purchasePackages;
-      // Transfer purchasing token from purchaser to contract
-      Safe17Transfer(activeTrade.purchaseTokenHash, sender, vendor, purchaseAmount);
-      // Transfer buying token from contract to purchaser
-      Safe17Transfer(activeTrade.offerTokenHash, vendor, sender, sellAmount);
       // Update sold packages
       activeTrade.soldPackages += purchasePackages;
       // Save Trade
       TradePoolStorage.Put(tradeId, activeTrade);
       OnTradeExecuted(tradeId, purchasePackages, activeTrade.purchaseTokenHash, purchaseAmount, activeTrade.offerTokenHash, sellAmount);
+      // Call external after state modification
+      // Transfer purchasing token from purchaser to contract
+      Safe17Transfer(activeTrade.purchaseTokenHash, sender, vendor, purchaseAmount);
+      // Transfer buying token from contract to purchaser
+      Safe17Transfer(activeTrade.offerTokenHash, vendor, sender, sellAmount);
     }
 
     /// <summary>

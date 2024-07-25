@@ -18,30 +18,16 @@ namespace Vendor
     {
       string contractAddress = contractHash.ToAddress();
       string failedMessage = $"{NEP11_TRANSFER_FAILED}: {contractAddress}";
-      try
-      {
-        bool result = (bool)Contract.Call(contractHash, TRANSFER_METHOD, CallFlags.All, new object[] { to, tokenId, null });
-        Assert(result, failedMessage);
-      }
-      catch (Exception)
-      {
-        Assert(false, failedMessage);
-      }
+      bool result = (bool)Contract.Call(contractHash, TRANSFER_METHOD, CallFlags.All, new object[] { to, tokenId, null });
+      Assert(result, failedMessage);
     }
 
     public static void Safe17Transfer(UInt160 contractHash, UInt160 from, UInt160 to, BigInteger amount)
     {
       string contractAddress = contractHash.ToAddress();
       string failedMessage = $"{NEP17_TRANSFER_FAILED}: {contractAddress}";
-      try
-      {
-        var result = (bool)Contract.Call(contractHash, TRANSFER_METHOD, CallFlags.All, new object[] { from, to, amount, null });
-        Assert(result, failedMessage);
-      }
-      catch (Exception)
-      {
-        Assert(false, failedMessage);
-      }
+      var result = (bool)Contract.Call(contractHash, TRANSFER_METHOD, CallFlags.All, new object[] { from, to, amount, null });
+      Assert(result, failedMessage);
     }
 #pragma warning restore CS8625 // Suppress known warning
   }

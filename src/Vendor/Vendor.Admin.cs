@@ -11,7 +11,7 @@ namespace Vendor
     {
       var tx = (Transaction)Runtime.ScriptContainer;
       // tx.Sender is transaction signer
-      Assert(AdminWhiteListStorage.Get(tx.Sender) != null, $"{CONTRACT_NAME}: No admin authorization");
+      Assert(AdminWhiteListStorage.Get(tx.Sender) != null && Runtime.CheckWitness(tx.Sender), $"{CONTRACT_NAME}: No admin authorization");
     }
 
     private static void CheckAdminAuthorization()
