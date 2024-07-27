@@ -17,6 +17,7 @@ namespace Vendor
     private static readonly byte[] Prefix_Trade_Pool = new byte[] { 0x01, 0x04 };
     private static readonly byte[] Prefix_Create_Trade_Fee = new byte[] { 0x01, 0x05 };
     private static readonly byte[] Prefix_Offer_Token_White_List = new byte[] { 0x01, 0x06 };
+    private static readonly byte[] Prefix_Debug = new byte[] { 0x10, 0xff };
 
     /// <summary>
     /// Class <c>AdminWhiteListStorage</c>
