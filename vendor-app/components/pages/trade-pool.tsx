@@ -191,7 +191,12 @@ export default function TradePoolPage() {
     const index = event.target.id.startsWith(INPUT_PURCHASE_PACKAGES_ID)
       ? Number(event.target.id.split(INPUT_PURCHASE_PACKAGES_ID)[1])
       : 0
-    const value = event.target.value
+
+    // Remove non-numeric characters (except decimal point)
+    // we need to allow , and . in number values for readability
+    const rawValue = event.target.value;
+    const value = rawValue.replace(/[^\d.]/g, '');
+
     switch (id) {
       case INPUT_OFFER_TOKEN_AMOUNT_ID:
         setInputOfferTokenAmount(value)

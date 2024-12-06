@@ -18,7 +18,7 @@ export enum WhiteListAction {
 
 export const VENDOR_SCRIPT_HASH = {
   [TESTNET]: '0x2792f6c37e165bbe7ca2a210689dc73136446e2c',
-  [MAINNET]: '0xa06cfd7ae9dd7befb7bf8e5b8c5902c969182de0',
+  [MAINNET]: '0x57cb16ff096812231fb92eebcdbf4d2e2fac386c',
 }
 
 export interface ITradeProperties {
@@ -46,8 +46,9 @@ export class VendorContract {
   contractHash: string
 
   constructor(networkType: INetworkType) {
-    this.network = networkType
-    this.contractHash = VENDOR_SCRIPT_HASH[networkType]
+    // FIXME: these values aren't populated for some reason
+    this.network = "N3MainNet"// networkType
+    this.contractHash = VENDOR_SCRIPT_HASH[MAINNET] // VENDOR_SCRIPT_HASH[networkType]
   }
 
   ModifyAdminWhiteList = async (
