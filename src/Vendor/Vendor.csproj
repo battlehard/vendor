@@ -15,22 +15,22 @@
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
-  <!-- Post-build step to move files AFTER Neo.BuildTasks -->
-  <Target Name="MoveNeoArtifacts" AfterTargets="NeoContractBuild">
+  <!-- Post-build step to copy files AFTER Neo.BuildTasks -->
+  <Target Name="CopyNeoArtifacts" AfterTargets="NeoContractBuild">
     <!-- Ensure directories exist -->
     <MakeDir Directories="..\..\build\Debug\" />
     <MakeDir Directories="..\..\build\sc\" />
 
-    <!-- Move contract files -->
-    <Move SourceFiles="bin\Debug\net6.0\$(AssemblyName).nef"
-          DestinationFolder="..\..\build\sc\" />
-    <Move SourceFiles="bin\Debug\net6.0\$(AssemblyName).manifest.json"
-          DestinationFolder="..\..\build\sc\" />
+    <!-- Copy contract files -->
+    <Copy SourceFiles="bin\Debug\net6.0\$(AssemblyName).nef"
+          DestinationFolder="..\..\build\sc\" Condition="Exists('bin\Debug\net6.0\$(AssemblyName).nef')" />
+    <Copy SourceFiles="bin\Debug\net6.0\$(AssemblyName).manifest.json"
+          DestinationFolder="..\..\build\sc\" Condition="Exists('bin\Debug\net6.0\$(AssemblyName).manifest.json')" />
 
-    <!-- Move general build artifacts -->
+    <!-- Copy general build artifacts -->
     <Copy SourceFiles="bin\Debug\net6.0\$(AssemblyName).dll"
-          DestinationFolder="..\..\build\Debug\" />
+          DestinationFolder="..\..\build\Debug\" Condition="Exists('bin\Debug\net6.0\$(AssemblyName).dll')" />
     <Copy SourceFiles="bin\Debug\net6.0\$(AssemblyName).pdb"
-          DestinationFolder="..\..\build\Debug\" />
+          DestinationFolder="..\..\build\Debug\" Condition="Exists('bin\Debug\net6.0\$(AssemblyName).pdb')" />
   </Target>
 </Project>

@@ -9,9 +9,29 @@ import Notification from '../notification'
 import { HASH160_PATTERN, NUMBER_PATTERN } from '../constant'
 
 const InputTextField = styled(TextField)`
-  width: 450px;
-  margin-top: 25px;
-  margin-left: 25px;
+  width: 450px
+  margin-top: 25px
+  margin-left: 25px
+  & .MuiInputBase-input {
+    color: rgba(255, 255, 255, 0.87) /* Input text color */
+  }
+  & .MuiInputLabel-root {
+    color: rgba(255, 255, 255, 0.6) /* Label color */
+  }
+  & .MuiOutlinedInput-root {
+    & fieldset {
+      border-color: rgba(255, 255, 255, 0.6) /* Border color */
+    }
+    &:hover fieldset {
+      border-color: #90caf9 /* Hover border color */
+    }
+    &.Mui-focused fieldset {
+      border-color: #90caf9 /* Focus border color */
+    }
+  }
+  & .MuiFormHelperText-root {
+    color: rgba(255, 255, 255, 0.6) /* Helper text color */
+  }
 `
 
 export default function AdminPage() {
@@ -135,13 +155,8 @@ export default function AdminPage() {
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <TextField
+        <InputTextField
           required
-          style={{
-            width: '450px',
-            marginTop: '25px',
-            marginLeft: '25px',
-          }}
           label="Offer Token Contract Hash (Required)"
           helperText={
             isValidHash
@@ -178,7 +193,20 @@ export default function AdminPage() {
         <Button
           disabled={isDisable(offerTokenWhiteListAction)}
           onClick={invoke}
-          style={{ marginTop: '25px', marginLeft: '25px', alignSelf: 'start' }}
+          sx={{
+            marginTop: '25px',
+            marginLeft: '25px',
+            alignSelf: 'start',
+            color: 'rgba(255, 255, 255, 0.87)', // Button text color
+            backgroundColor: 'rgba(144, 202, 249, 0.2)', // Button background
+            '&:hover': {
+              backgroundColor: '#90caf9', // Hover background
+            },
+            '&.Mui-disabled': {
+              color: 'rgba(255, 255, 255, 0.3)', // Disabled text color
+              backgroundColor: 'rgba(255, 255, 255, 0.1)', // Disabled background
+            },
+          }}
         >
           Invoke
         </Button>
@@ -255,7 +283,20 @@ export default function AdminPage() {
         <Button
           disabled={isInvokeDisable()}
           onClick={invokeAdminCancelTrade}
-          style={{ marginTop: '25px', marginLeft: '25px', alignSelf: 'start' }}
+          sx={{
+            marginTop: '25px',
+            marginLeft: '25px',
+            alignSelf: 'start',
+            color: 'rgba(255, 255, 255, 0.87)', // Button text color
+            backgroundColor: 'rgba(144, 202, 249, 0.2)', // Button background
+            '&:hover': {
+              backgroundColor: '#90caf9', // Hover background
+            },
+            '&.Mui-disabled': {
+              color: 'rgba(255, 255, 255, 0.3)', // Disabled text color
+              backgroundColor: 'rgba(255, 255, 255, 0.1)', // Disabled background
+            },
+          }}
         >
           Invoke
         </Button>

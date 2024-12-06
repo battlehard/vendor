@@ -2,18 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global colors for dark theme */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  --foreground-rgb: 255, 255, 255; /* White text */
+  --background-start-rgb: 24, 24, 27; /* Dark background */
+  --background-end-rgb: 18, 18, 20; /* Even darker background */
 }
 
 body {
@@ -24,4 +17,29 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+}
+
+a {
+  color: rgb(var(--foreground-rgb)); /* Ensure links are visible */
+  text-decoration: none;
+}
+
+button {
+  color: rgb(var(--foreground-rgb));
+  background-color: rgb(var(--background-start-rgb));
+  border: 1px solid rgba(var(--foreground-rgb), 0.5);
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+}
+
+input, textarea {
+  color: rgb(var(--foreground-rgb));
+  background-color: rgb(var(--background-start-rgb));
+  border: 1px solid rgba(var(--foreground-rgb), 0.5);
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: rgb(var(--foreground-rgb));
 }

@@ -21,16 +21,36 @@ export default function TabPanel({ pages }: Props) {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Tabs value={value} onChange={handleChange} aria-label="Tab component">
+      <Tabs
+        value={value}
+        onChange={handleChange}
+        aria-label="Tab component"
+        sx={{
+          '& .MuiTabs-indicator': {
+            backgroundColor: '#90caf9', // Accent color for the active tab indicator
+          },
+        }}
+      >
         {pages.map((page, index) => (
           <Tab
             key={index}
             label={page.label}
-            style={{ textTransform: 'none' }}
+            sx={{
+              textTransform: 'none',
+              color: 'rgba(255, 255, 255, 0.6)', // Default text color for inactive tabs
+              '&.Mui-selected': {
+                color: '#90caf9', // Active tab text color
+              },
+              '&:hover': {
+                color: '#b3e5fc', // Hover color
+              },
+            }}
           />
         ))}
       </Tabs>
-      {pages[value].component}
+      <Box sx={{ mt: 2, color: 'rgba(255, 255, 255, 0.87)' }}>
+        {pages[value].component}
+      </Box>
     </Box>
   )
 }

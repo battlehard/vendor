@@ -18,7 +18,7 @@ export enum WhiteListAction {
 
 export const VENDOR_SCRIPT_HASH = {
   [TESTNET]: '0x2792f6c37e165bbe7ca2a210689dc73136446e2c',
-  [MAINNET]: '',
+  [MAINNET]: '0xa06cfd7ae9dd7befb7bf8e5b8c5902c969182de0',
 }
 
 export interface ITradeProperties {
